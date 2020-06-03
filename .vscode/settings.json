@@ -1,0 +1,10 @@
+{
+    "python.pythonPath": "/opt/anaconda/bin/python",
+    "python.linting.flake8Enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Args": [
+        "--disable=E1101",
+        "--max-line-length=120"
+    ],
+    "python.linting.enabled": true
+}

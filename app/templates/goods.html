@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>
+    <img src="{{ goods.images[0].imageUrl }}" height="400" width="400"><br>
+    {{ goods.goodsName }}<br>
+    价格  <span style="color: red;">￥{{ goods.salePrice }}</span><br>
+    库存 {{ goods.stock }} | 销量 {{ goods.salesNum }}<br>
+    品牌 {{ brandName }} | 类别 {{ cateName }}<br>
+</p>
+<p>
+    {{ goods.description }}<br>
+    {% for image in goods.images %}
+        <img src="{{ image.imageUrl }}" height="500" width="500"><br>
+    {% endfor %}
+</p>
+{% endblock %}

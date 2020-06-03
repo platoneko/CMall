@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>品牌: {{ brandName }}</p>
+{% for goods in goods_list %}
+    <p>
+        <a href="/goods/{{ goods.goodsID }}">
+            <img src="{{ goods.images[0].imageUrl }}", height="200", width="200"><br>
+            {{ goods.goodsName }}
+        </a>
+        <span style="color: red;">{{ goods.salePrice }}</span>
+    </p>
+{% endfor %}
+
+{% endblock %}

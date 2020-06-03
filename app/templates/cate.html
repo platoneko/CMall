@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>商品分类: {{ cateName }}</p>
+{% for goods in goods_list %}
+    <p>
+        <a href="/goods/{{ goods.goodsID }}">
+            <img src="{{ goods.images[0].imageUrl }}", height="200", width="200">
+            {{ goods.goodsName }}
+        </a>
+        <span style="color: red;">{{ goods.salePrice }}</span>
+    </p>
+{% endfor %}
+
+{% endblock %}

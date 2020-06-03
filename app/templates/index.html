@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>商品分类</p>
+<ul>
+{% for category in categories %}
+    <li>
+        <a href="/cate/{{ category.cateID }}">{{ category.cateName }}</a>
+    </li>
+{% endfor %}
+</ul>
+<p>品牌</p>
+<ul>
+{% for brand in brands %}
+    <li>
+        <a href="/brand/{{ brand.brandID }}">{{ brand.brandName }}</a>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,15 @@
+<html>
+    <body>
+        <a href="/index">菜猫首页</a>
+        {% if g.user is not None and g.user.is_authenticated %}
+            <p>Hi，{{ g.user.custName }}</p>
+            <a href="#">我的订单</a>
+            <a href="/logout">退出</a>
+        {% else %}
+            <p>喵，欢迎来到菜猫</p>
+            <a href="/login">请登录</a>
+            <a href="/register">免费注册</a>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </body>
+</html>
