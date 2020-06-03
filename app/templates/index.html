@@ -5,7 +5,7 @@
 <ul>
 {% for category in categories %}
     <li>
-        <a href="/cate/{{ category.cateID }}">{{ category.cateName }}</a>
+        <a href="/cate/{{ category.id }}">{{ category.name }}</a>
     </li>
 {% endfor %}
 </ul>
@@ -13,7 +13,7 @@
 <ul>
 {% for brand in brands %}
     <li>
-        <a href="/brand/{{ brand.brandID }}">{{ brand.brandName }}</a>
+        <a href="/brand/{{ brand.id }}">{{ brand.name }}</a>
     </li>
 {% endfor %}
 </ul>

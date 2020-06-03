@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(size=32, required=false) }}<br>
+        {% for error in form.name.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.cate.label }}<br>
+        {{ form.cate(required=false) }}<br>
+        {% for error in form.cate.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.brand.label }}<br>
+        {{ form.brand(required=false) }}<br>
+        {% for error in form.brand.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.purchase_price.label }}<br>
+        {{ form.purchase_price(size=32, required=false) }}<br>
+        {% for error in form.purchase_price.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.sale_price.label }}<br>
+        {{ form.sale_price(size=32, required=false) }}<br>
+        {% for error in form.sale_price.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.stock.label }}<br>
+        {{ form.stock(size=32, required=false) }}<br>
+        {% for error in form.stock.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.description.label }}<br>
+        {{ form.description(cols=64, rows=8, required=false) }}<br>
+        {% for error in form.description.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.images.label }}<br>
+        {{ form.images(required=false) }}<br>
+        {% for error in form.images.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+        {{ message }}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endblock %}

@@ -1,7 +1,7 @@
 <html>
     <h1>用户登录</h1>
     <form action="" method="post">
-        {{ form.hidden_tag() }}
+        {{ form.csrf_token }}
         <p>
             {{ form.user.label }}<br>
             {{ form.user(size=32, required=false) }}<br>
@@ -16,6 +16,7 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
+        <p>{{ form.is_admin() }}{{ form.is_admin.label }}</p>
         <p>{{ form.submit() }}</p>
     </form>
     {% with messages = get_flashed_messages() %}

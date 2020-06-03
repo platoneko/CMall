@@ -2,16 +2,16 @@
 
 {% block content %}
 <p>
-    <img src="{{ goods.images[0].imageUrl }}" height="400" width="400"><br>
-    {{ goods.goodsName }}<br>
-    价格  <span style="color: red;">￥{{ goods.salePrice }}</span><br>
-    库存 {{ goods.stock }} | 销量 {{ goods.salesNum }}<br>
-    品牌 {{ brandName }} | 类别 {{ cateName }}<br>
+    <img src="{{ goods.images[0].url }}" height="400" width="400"><br>
+    {{ goods.name }}<br>
+    价格  <span style="color: red;">￥{{ goods.sale_price }}</span><br>
+    库存 {{ goods.stock }} | 销量 {{ goods.sales_num }}<br>
+    品牌 {{ brand_name }} | 类别 {{ cate_name }}<br>
 </p>
 <p>
     {{ goods.description }}<br>
     {% for image in goods.images %}
-        <img src="{{ image.imageUrl }}" height="500" width="500"><br>
+        <img src="{{ image.url }}" height="500" width="500"><br>
     {% endfor %}
 </p>
 {% endblock %}

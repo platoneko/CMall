@@ -1,7 +1,7 @@
 <html>
     <h1>用户注册</h1>
     <form action="" method="post">
-        {{ form.hidden_tag() }}
+        {{ form.csrf_token }}
         <p>
             {{ form.user.label }}<br>
             {{ form.user(size=32, required=false) }}<br>

@@ -1,10 +1,17 @@
 <html>
     <body>
         <a href="/index">菜猫首页</a>
-        {% if g.user is not None and g.user.is_authenticated %}
-            <p>Hi，{{ g.user.custName }}</p>
-            <a href="#">我的订单</a>
-            <a href="/logout">退出</a>
+        {% if g.user.is_authenticated %}
+            {% if g.user.privilege %}
+                <p>Hi，管理员 {{ g.user.id }}</p>
+                <a href="#">我管理的订单</a>
+                <a href="/add_goods">添加商品</a>
+                <a href="/logout">退出</a>
+            {% else %}
+                <p>Hi，{{ g.user.name }}</p>
+                <a href="#">我的订单</a>
+                <a href="/logout">退出</a>
+            {% endif %}
         {% else %}
             <p>喵，欢迎来到菜猫</p>
             <a href="/login">请登录</a>
