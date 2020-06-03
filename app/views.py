@@ -3,7 +3,7 @@ from flask import render_template, redirect, request, flash, g, session, abort
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db
 from .forms import LoginForm, RegisterForm, AddGoodsForm
-from .models import Customer, Admin, Category, Brand, Goods, Image
+from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, Image
 from .utils import random_filename
 
 
@@ -25,20 +25,20 @@ def index():
 @app.route('/cate/<id>')
 def cate(id):
     name = Category.query.get(id).name
-    goods_list = Goods.query.filter_by(cate_id=id)
+    goods_list = GoodsDetail.query.filter_by(cate_id=id)
     return render_template('/cate.html', name=name, goods_list=goods_list)
 
 
 @app.route('/brand/<id>')
 def brand(id):
     name = Brand.query.get(id).name
-    goods_list = Goods.query.filter_by(brand_id=id)
+    goods_list = GoodsDetail.query.filter_by(brand_id=id)
     return render_template('/brand.html', name=name, goods_list=goods_list)
 
 
 @app.route('/goods/<id>', methods=['GET', 'POST'])
 def goods(id):
-    goods = Goods.query.get(id)
+    goods = GoodsDetail.query.get(id)
     cate_name = Category.query.get(goods.cate_id).name
     brand_name = Brand.query.get(goods.brand_id).name
     return render_template('/goods.html', goods=goods, cate_name=cate_name, brand_name=brand_name)
@@ -114,7 +114,9 @@ def add_goods():
         img = form.images.data
         filename = random_filename(img.filename)
         url = os.path.join('/images/goods', filename)
-        goods = Goods(name=form.name.data,
+        goods = Goods(name=form.name.data)
+        db.session.add(goods)
+        goods_detail = GoodsDetail(goods=goods,
             cate_id=form.cate.data,
             brand_id=form.brand.data,
             purchase_price=form.purchase_price.data,
@@ -122,8 +124,8 @@ def add_goods():
             stock=form.stock.data,
             sales_num=0,
             description=form.description.data)
-        db.session.add(goods)
-        image = Image(url=url, goods=goods)
+        db.session.add(goods_detail)
+        image = Image(url=url, goods=goods_detail)
         db.session.add(image)
         img.save(os.path.join(app.config['UPLOAD_PATH'], filename))
         db.session.commit()

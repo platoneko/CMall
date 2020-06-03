@@ -1,3 +1,4 @@
+DROP DATABASE CMall;
 CREATE DATABASE CMall;
 
 USE CMall;
@@ -46,7 +47,12 @@ USE CMall;
 -- 商品表
 CREATE TABLE Goods (
 	id INT  PRIMARY KEY AUTO_INCREMENT,
-	name CHAR (30),
+	name CHAR (30)
+);
+
+
+CREATE TABLE GoodsDetail (
+	id INT  PRIMARY KEY,
 	cate_id INT ,
 	brand_id INT ,
 	purchase_price DECIMAL (8, 2),
@@ -54,12 +60,14 @@ CREATE TABLE Goods (
 	stock INT ,
 	sales_num INT ,
 	description VARCHAR (500),
+	FOREIGN KEY (id) REFERENCES Goods (id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (cate_id) REFERENCES Category (id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (brand_id) REFERENCES Brand (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE INDEX cate_id_index ON Goods (cate_id);
-CREATE INDEX brand_id_index ON Goods (brand_id);
+CREATE INDEX cate_id_index ON GoodsDetail (cate_id);
+CREATE INDEX brand_id_index ON GoodsDetail (brand_id);
+
 
 USE CMall;
 -- 商品图片表
@@ -67,7 +75,7 @@ CREATE TABLE Image (
 	id INT  PRIMARY KEY AUTO_INCREMENT,
 	url VARCHAR (100),
 	goods_id INT ,
-	FOREIGN KEY (goods_id) REFERENCES Goods (id) ON DELETE CASCADE ON UPDATE CASCADE
+	FOREIGN KEY (goods_id) REFERENCES GoodsDetail (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE INDEX goods_id_index ON Image (goods_id);

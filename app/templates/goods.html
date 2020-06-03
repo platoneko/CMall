@@ -3,7 +3,7 @@
 {% block content %}
 <p>
     <img src="{{ goods.images[0].url }}" height="400" width="400"><br>
-    {{ goods.name }}<br>
+    {{ goods.goods.name }}<br>
     价格  <span style="color: red;">￥{{ goods.sale_price }}</span><br>
     库存 {{ goods.stock }} | 销量 {{ goods.sales_num }}<br>
     品牌 {{ brand_name }} | 类别 {{ cate_name }}<br>
