@@ -131,10 +131,9 @@ CREATE TABLE Inventory (
 );
 
 USE CMall;
+DELETE FROM Image WHERE 1;
+DELETE FROM Goods WHERE 1;
+DELETE FROM GoodsDetail WHERE 1;
 INSERT INTO Admin VALUES ("admin", "pbkdf2:sha256:150000$ReEVRMsw$9b4d878541ab4090097fe16889dbd8c52375c05c6d48e02d71fee944c607a8ac", 100);
 INSERT INTO Category (name) VALUES ("智能手机"), ("游戏本"), ("商务本");
 INSERT INTO Brand (name) VALUES ("华为"), ("小米"), ("vivo"), ("oppo"), ("苹果");
-
-USE CMall;
-DELETE FROM Goods WHERE 1;
-DELETE FROM Image WHERE 1;

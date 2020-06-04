@@ -54,6 +54,24 @@ class RegisterForm(FlaskForm):
     submit = SubmitField('确认注册')
 
 
+class ValidationForm(FlaskForm):
+    password = PasswordField('密码', validators=[DataRequired('密码不能为空')])
+    submit = SubmitField('提交')
+
+
+class CateForm(FlaskForm):
+	name = StringField('类别名', validators=[DataRequired('类别名不能为空'), 
+		Length(1, 20, message='类别名长度不得超过20个字符')])
+	submit = SubmitField('添加')
+
+
+
+class BrandForm(FlaskForm):
+	name = StringField('品牌名', validators=[DataRequired('品牌名不能为空'), 
+		Length(1, 20, message='品牌名长度不得超过20个字符')])
+	submit = SubmitField('添加')
+
+
 class AddGoodsForm(FlaskForm):
 	name = StringField('商品名', validators=[DataRequired('商品名不能为空'), 
 		Length(1, 30, message='商品名长度不得超过30个字符')])

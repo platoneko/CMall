@@ -6,7 +6,7 @@
 {% for goods in goods_list %}
     <p>
         <a href="/goods/{{ goods.id }}">
-            <img src="{{ goods.images[0].url }}", height="200", width="200">
+            <img src="{{ goods.images.first().url }}", height="200", width="200">
             {{ goods.goods.name }}
         </a>
         <span style="color: red;">{{ goods.sale_price }}</span>

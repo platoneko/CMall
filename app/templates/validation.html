@@ -1,0 +1,13 @@
+<html>
+    <h1>需要进行身份验证</h1>
+    <p>{{ msg }}</p>
+    <form action="" method="post">
+        {{ form.csrf_token }}
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(size=32, required=false) }}<br>
+            <span style="color: red;">{{ form.password.errors[0] }}</span>
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+</html>

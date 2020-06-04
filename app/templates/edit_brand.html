@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<form action="" method="post">
+    {{ form.csrf_token }}
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(size=32, required=false) }}<br>
+        <span style="color: red;">{{ form.name.errors[0] }}</span>
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 <ul>
@@ -10,19 +20,12 @@
 </ul>
 {% endif %}
 {% endwith %}
-<p>商品分类</p>
-<ul>
-{% for category in categories %}
-    <li>
-        <a href="/cate/{{ category.id }}">{{ category.name }}</a>
-    </li>
-{% endfor %}
-</ul>
 <p>品牌</p>
 <ul>
 {% for brand in brands %}
     <li>
         <a href="/brand/{{ brand.id }}">{{ brand.name }}</a>
+        <a href="/del_brand/{{ brand.id }}">删除</a>
     </li>
 {% endfor %}
 </ul>

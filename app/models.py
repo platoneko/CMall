@@ -10,6 +10,8 @@ class Customer(db.Model):
     name = db.Column(db.String(10))
     tel = db.Column(db.String(11))
     pwd = db.Column(db.String(128))
+    addrs = db.relationship('ShipAddr')
+    orders = db.relationship('CustOrder')
 
     @property
     def is_active(self):
@@ -42,6 +44,7 @@ class Admin(db.Model):
     id = db.Column(db.String(8), primary_key=True)
     pwd = db.Column(db.String(128))
     privilege = db.Column(db.SmallInteger)
+    orders = db.relationship('CustOrder')
 
     @property
     def is_active(self):
@@ -80,18 +83,21 @@ class Category(db.Model):
     __tablename__ = 'Category'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(20), unique=True)
+    goods = db.relationship('GoodsDetail', backref='cate', cascade='delete')
+
 
 class Brand(db.Model):
     __tablename__ = 'Brand'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(20), unique=True)
+    goods = db.relationship('GoodsDetail', backref='brand', cascade='delete')
 
 
 class Goods(db.Model):
     __tablename__ = 'Goods'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(30))
-    detail = db.relationship('GoodsDetail', backref='goods', uselist=False)
+    detail = db.relationship('GoodsDetail', backref='goods')
 
 
 class GoodsDetail(db.Model):
@@ -104,7 +110,7 @@ class GoodsDetail(db.Model):
     stock = db.Column(db.Integer)
     sales_num = db.Column(db.Integer)
     description = db.Column(db.String(500))
-    images = db.relationship('Image', backref='goods', lazy='dynamic')
+    images = db.relationship('Image', backref='goods', lazy='dynamic', cascade='delete')
 
 
 class Image(db.Model):
@@ -126,3 +132,5 @@ class CustOrder(db.Model):
     status = db.Column(db.SmallInteger, default=0)
     quantity = db.Column(db.SmallInteger)
     cost = db.Column(db.DECIMAL(8, 2))
+    goods = db.relationship('Goods', uselist=False)
+    shipaddr = db.relationship('ShipAddr', uselist=False)

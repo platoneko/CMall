@@ -5,37 +5,27 @@
         <p>
             {{ form.user.label }}<br>
             {{ form.user(size=32, required=false) }}<br>
-            {% for error in form.user.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
+            <span style="color: red;">{{ form.user.errors[0] }}</span>
         </p>
         <p>
             {{ form.name.label }}<br>
             {{ form.name(size=32, required=false) }}<br>
-            {% for error in form.name.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
+            <span style="color: red;">{{ form.name.errors[0] }}</span>
         </p>
         <p>
             {{ form.tel.label }}<br>
             {{ form.tel(size=32, required=false) }}<br>
-            {% for error in form.tel.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
+            <span style="color: red;">{{ form.tel.errors[0] }}</span>
         </p>
         <p>
             {{ form.password.label }}<br>
             {{ form.password(size=32, required=false) }}<br>
-            {% for error in form.password.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
+            <span style="color: red;">{{ form.password.errors[0] }}</span>
         </p>
         <p>
             {{ form.repassword.label }}<br>
             {{ form.repassword(size=32, required=false) }}<br>
-            {% for error in form.repassword.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
+            <span style="color: red;">{{ form.repassword.errors[0] }}</span>
         </p>
         <p>{{ form.submit() }}</p>
     </form>

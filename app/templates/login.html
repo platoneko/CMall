@@ -5,16 +5,16 @@
         <p>
             {{ form.user.label }}<br>
             {{ form.user(size=32, required=false) }}<br>
-            {% for error in form.user.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
+            {% if form.user.errors %}
+            <span style="color: red;">[{{ form.user.errors[0] }}]</span>
+            {% endif %}
         </p>
         <p>
             {{ form.password.label }}<br>
             {{ form.password(size=32, required=false) }}<br>
-            {% for error in form.password.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
+            {% if form.password.errors %}
+            <span style="color: red;">[{{ form.password.errors[0] }}]</span>
+            {% endif %}
         </p>
         <p>{{ form.is_admin() }}{{ form.is_admin.label }}</p>
         <p>{{ form.submit() }}</p>

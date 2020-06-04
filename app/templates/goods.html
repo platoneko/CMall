@@ -2,15 +2,18 @@
 
 {% block content %}
 <p>
-    <img src="{{ goods.images[0].url }}" height="400" width="400"><br>
-    {{ goods.goods.name }}<br>
+    <img src="{{ goods.images.first().url }}" height="400" width="400"><br>
+    {{ goods.goods.name }}
+    {% if g.user.privilege %}
+    <a href="/del_goods/{{ goods.id }}">删除</a>
+    {% endif %}<br>
     价格  <span style="color: red;">￥{{ goods.sale_price }}</span><br>
     库存 {{ goods.stock }} | 销量 {{ goods.sales_num }}<br>
     品牌 {{ brand_name }} | 类别 {{ cate_name }}<br>
 </p>
 <p>
     {{ goods.description }}<br>
-    {% for image in goods.images %}
+    {% for image in goods.images.all() %}
         <img src="{{ image.url }}" height="500" width="500"><br>
     {% endfor %}
 </p>
