@@ -1,9 +1,10 @@
+import os
+
 CSRF_ENABLED = True
 SECRET_KEY = 'lyUEbklKUptSZcwz'
 
 MAX_CONTENT_LENGTH = 10 * 1024 * 1024
 
-import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 UPLOAD_PATH = os.path.join(basedir, 'app/static/images/goods')

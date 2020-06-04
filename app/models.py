@@ -33,7 +33,7 @@ class Customer(db.Model):
 
     def check_pwd(self, password):
         return check_password_hash(self.pwd, password)
-    
+
     @property
     def privilege(self):
         return 0

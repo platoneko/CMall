@@ -2,8 +2,8 @@ import os
 from flask import render_template, redirect, request, flash, g, session, abort
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db
-from .forms import LoginForm, RegisterForm, AddGoodsForm, CateForm, BrandForm, ValidationForm
-from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, Image
+from .forms import LoginForm, RegisterForm, AddGoodsForm, CateForm, BrandForm, ValidationForm, AddrForm
+from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, Image, ShipAddr
 from .utils import random_filename
 
 
@@ -17,9 +17,9 @@ def before_request():
 def index():
     categories = Category.query.all()
     brands = Brand.query.all()
-    return render_template('/index.html', 
-        categories=categories,
-        brands=brands)
+    return render_template('/index.html',
+                           categories=categories,
+                           brands=brands)
 
 
 @app.route('/cate/<id>')
@@ -122,7 +122,8 @@ def add_goods():
         url = os.path.join('/images/goods', filename)
         goods = Goods(name=form.name.data)
         db.session.add(goods)
-        goods_detail = GoodsDetail(goods=goods,
+        goods_detail = GoodsDetail(
+            goods=goods,
             cate_id=form.cate.data,
             brand_id=form.brand.data,
             purchase_price=form.purchase_price.data,
@@ -189,6 +190,9 @@ def del_cate(id):
     form = ValidationForm()
     if form.validate_on_submit():
         if g.user.check_pwd(form.password.data):
+            for goods in cate.goods:
+                for image in goods.images.all():
+                    os.remove(os.path.join(app.config['UPLOAD_PATH'], os.path.split(image.url)[-1]))
             db.session.delete(cate)
             db.session.commit()
             flash(f'类别\"{cate.name}\"已被删除')
@@ -210,6 +214,9 @@ def del_brand(id):
     form = ValidationForm()
     if form.validate_on_submit():
         if g.user.check_pwd(form.password.data):
+            for goods in brand.goods:
+                for image in goods.images.all():
+                    os.remove(os.path.join(app.config['UPLOAD_PATH'], os.path.split(image.url)[-1]))
             db.session.delete(brand)
             db.session.commit()
             flash(f'品牌\"{brand.name}\"已被删除')
@@ -242,3 +249,23 @@ def del_goods(id):
             flash('身份验证失败')
             return redirect('/index')
     return render_template('/validation.html', msg=f'正在删除商品\"{name}\"', form=form)
+
+
+@app.route('/edit_addr', methods=['GET', 'POST'])
+@login_required
+def edit_addr():
+    if (g.user.privilege):
+        redirect('/index')
+    form = AddrForm()
+    if form.validate_on_submit():
+        province = request.form.get('province')
+        city = request.form.get('city')
+        if not province or not city:
+            flash('省份或城市不能为空')
+            return redirect('/edit_addr')
+        db.session.add(ShipAddr(cust_id=g.user.id, addr=('').join([province, city, form.addr.data])))
+        db.session.commit()
+        flash('添加成功')
+        return redirect('/edit_addr')
+    addrs = g.user.addrs
+    return render_template('/edit_addr.html', addrs=addrs, form=form)
