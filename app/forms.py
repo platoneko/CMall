@@ -92,10 +92,10 @@ class AddGoodsForm(FlaskForm):
         DataRequired('非法的输入'),
         NumberRange(0.01, 999999.99, message='售价必须在0.01~999999.99之间')])
     stock = IntegerField('库存', validators=[
-        DataRequired('非法的输入'), 
+        DataRequired('非法的输入'),
         NumberRange(1, 100000, message='库存必须在1~100000之间')])
     description = TextAreaField('描述', validators=[
-        DataRequired('描述不能为空'), 
+        DataRequired('描述不能为空'),
         Length(10, 500, message='描述长度不得少于10个字符、不得超过500个字符')])
     images = FileField('上传商品图片', validators=[
         FileRequired('必须至少上传1张图片'),
@@ -108,3 +108,11 @@ class AddrForm(FlaskForm):
         DataRequired('详细地址不能为空'),
         Length(1, 80, message='地址长度不得超过80个字符')])
     submit = SubmitField('提交')
+
+
+class PurchaseForm(FlaskForm):
+    qty = IntegerField('购买数量', default=1, validators=[
+        DataRequired('非法的输入'),
+        NumberRange(1, 99, '一次性购买数量不能超过99')])
+    addr = SelectField('收货地址', validators=[DataRequired('地址不能为空')], coerce=int)
+    submit = SubmitField('提交订单')

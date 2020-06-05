@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+        {{ message }}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
 <p>
     <img src="{{ goods.images.first().url }}" height="400" width="400"><br>
     {{ goods.goods.name }}
@@ -10,6 +19,9 @@
     价格  <span style="color: red;">￥{{ goods.sale_price }}</span><br>
     库存 {{ goods.stock }} | 销量 {{ goods.sales_num }}<br>
     品牌 {{ brand_name }} | 类别 {{ cate_name }}<br>
+    {% if g.user.privilege == 0 %}
+    <a href="/purchase/{{ goods.id }}">立即购买</a>
+    {% endif %}<br>
 </p>
 <p>
     {{ goods.description }}<br>

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>
+    <img src="{{ goods.images.first().url }}" height="200" width="200"><br>
+    {{ goods.goods.name }} <span style="color: red;">{{ goods.sale_price }}</span>
+</p>
+<form action="" method="post">
+    {{ form.csrf_token }}
+    <p>
+        {{ form.qty.label }}<br>
+        {{ form.qty(size=16, required=false) }}<br>
+        <span style="color: red;">{{ form.qty.errors[0] }}</span>
+    </p>
+    <p>
+        {{ form.addr.label }}<br>
+        {{ form.addr(required=false) }}<br>
+        <span style="color: red;">{{ form.addr.errors[0] }}</span>
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}

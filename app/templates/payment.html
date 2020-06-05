@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>
+    因为没能通过支付宝审核，这是一个假的支付页面
+</p>
+<p>
+    应支付 <span style="color: red;">￥{{ order.cost }}</span>
+</p>
+<p>
+    此处假装有支付码
+    <a href="/paying/{{ order.id }}">
+        <button>假装点我扫码付款</button>
+    </a>
+</p>
+{% endblock %}

@@ -1,9 +1,12 @@
 import os
+import datetime
 from flask import render_template, redirect, request, flash, g, session, abort
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db
-from .forms import LoginForm, RegisterForm, AddGoodsForm, CateForm, BrandForm, ValidationForm, AddrForm
-from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, Image, ShipAddr
+from .forms import LoginForm, RegisterForm, AddGoodsForm, CateForm, BrandForm, \
+    ValidationForm, AddrForm, PurchaseForm
+from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, \
+    Image, ShipAddr, CustOrder
 from .utils import random_filename
 
 
@@ -24,27 +27,21 @@ def index():
 
 @app.route('/cate/<id>')
 def cate(id):
-    cate = Category.query.get(id)
-    if cate is None:
-        abort(404)
+    cate = Category.query.get_or_404(id)
     goods_list = cate.goods
     return render_template('/cate.html', name=cate.name, goods_list=goods_list)
 
 
 @app.route('/brand/<id>')
 def brand(id):
-    brand = Brand.query.get(id)
-    if brand is None:
-        abort(404)
+    brand = Brand.query.get_or_404(id)
     goods_list = brand.goods
     return render_template('/brand.html', name=brand.name, goods_list=goods_list)
 
 
 @app.route('/goods/<id>', methods=['GET', 'POST'])
 def goods(id):
-    goods = GoodsDetail.query.get(id)
-    if goods is None:
-        abort(404)
+    goods = GoodsDetail.query.get_or_404(id)
     cate_name = goods.cate.name
     brand_name = goods.brand.name
     return render_template('/goods.html', goods=goods, cate_name=cate_name, brand_name=brand_name)
@@ -184,9 +181,7 @@ def edit_brand():
 def del_cate(id):
     if (g.user.privilege < 100):
         abort(403)
-    cate = Category.query.get(id)
-    if cate is None:
-        abort(404)
+    cate = Category.query.get_or_404(id)
     form = ValidationForm()
     if form.validate_on_submit():
         if g.user.check_pwd(form.password.data):
@@ -208,9 +203,7 @@ def del_cate(id):
 def del_brand(id):
     if (g.user.privilege < 100):
         abort(403)
-    brand = Brand.query.get(id)
-    if brand is None:
-        abort(404)
+    brand = Brand.query.get_or_404(id)
     form = ValidationForm()
     if form.validate_on_submit():
         if g.user.check_pwd(form.password.data):
@@ -232,9 +225,7 @@ def del_brand(id):
 def del_goods(id):
     if (g.user.privilege < 100):
         abort(403)
-    goods = GoodsDetail.query.get(id)
-    if goods is None:
-        abort(404)
+    goods = GoodsDetail.query.get_or_404(id)
     form = ValidationForm()
     name = goods.goods.name
     if form.validate_on_submit():
@@ -269,3 +260,109 @@ def edit_addr():
         return redirect('/edit_addr')
     addrs = g.user.addrs
     return render_template('/edit_addr.html', addrs=addrs, form=form)
+
+
+@app.route('/del_addr/<id>')
+@login_required
+def del_addr(id):
+    if (g.user.privilege):
+        redirect('/index')
+    addr = ShipAddr.query.get(id)
+    if addr.cust_id != g.user.id:
+        abort(403)
+    addr.cust_id = None
+    db.session.commit()
+    flash('地址删除成功')
+    return redirect('/edit_addr')
+
+
+@app.route('/purchase/<id>', methods=['GET', 'POST'])
+@login_required
+def purchase(id):
+    if (g.user.privilege):
+        redirect('/index')
+    if g.user.addrs is None:
+        redirect('edit_addr')
+    goods = GoodsDetail.query.get_or_404(id)
+    if goods.stock == 0:
+        flash('商品库存不足')
+        return redirect(f'/goods/{id}')
+    form = PurchaseForm()
+    addr_choices = []
+    for addr in g.user.addrs:
+        addr_choices.append((addr.id, addr.addr))
+    form.addr.choices = addr_choices
+    if form.validate_on_submit():
+        cost = GoodsDetail.query.get(id).sale_price * form.qty.data
+        order = CustOrder(
+            goods_id=id,
+            cust_id=g.user.id,
+            shipaddr_id=form.addr.data,
+            quantity=form.qty.data,
+            cost=cost
+        )
+        db.session.add(order)
+        db.session.commit()
+        return redirect(f'/payment/{order.id}')
+    return render_template('/purchase.html', form=form, goods=goods)
+
+
+@app.route('/payment/<id>')
+@login_required
+def payment(id):
+    if (g.user.privilege):
+        redirect('/index')
+    order = CustOrder.query.get_or_404(id)
+    if order.cust_id != g.user.id:
+        abort(403)
+    return render_template('/payment.html', order=order)
+
+
+@app.route('/paying/<id>')
+@login_required
+def paying(id):
+    if (g.user.privilege):
+        redirect('/index')
+    order = CustOrder.query.get_or_404(id)
+    if order.status != 0:
+        abort(404)
+    goods = db.session.query(GoodsDetail).with_for_update().get(order.goods_id)
+    if goods.stock < order:
+        db.session.commit()
+        flash('商品库存不足')
+        return redirect('/cust_orders/0')
+    goods.stock -= order.quantity
+    goods.sales_num += order.quantity
+    order.pay_time = datetime.datetime.now()
+    order.status = 1
+    db.session.commit()
+    flash('支付成功')
+    return redirect('/cust_orders/1')
+
+
+@app.route('/cust_orders/<status>')
+@login_required
+def cust_orders(status):
+    if (g.user.privilege):
+        redirect('/index')
+    msg = [
+        '未付款订单',
+        '已付款订单',
+        '已发货订单',
+        '待评价订单',
+        '已完成订单'
+    ]
+    orders = CustOrder.query.filter_by(cust_id=g.user.id, status=status). \
+        order_by(CustOrder.create_time.desc()).all()
+    return render_template('/cust_orders.html', orders=orders, msg=msg[int(status)])
+
+
+@app.route('/cust_order/<id>')
+@login_required
+def cust_order(id):
+    if (g.user.privilege):
+        redirect('/index')
+    order = CustOrder.query.get_or_404(id)
+    if order.cust_id != g.user.id:
+        abort(403)
+    return render_template('cust_order.html', order=order)

@@ -11,7 +11,7 @@ class Customer(db.Model):
     tel = db.Column(db.String(11))
     pwd = db.Column(db.String(128))
     addrs = db.relationship('ShipAddr')
-    orders = db.relationship('CustOrder')
+    orders = db.relationship('CustOrder', lazy='dynamic')
 
     @property
     def is_active(self):
@@ -123,7 +123,7 @@ class Image(db.Model):
 class CustOrder(db.Model):
     __tablename__ = 'CustOrder'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    create_time = db.Column(db.DateTime, default=datetime.datetime.now)
+    create_time = db.Column(db.DateTime, default=datetime.datetime.now())
     pay_time = db.Column(db.DateTime)
     goods_id = db.Column(db.Integer, db.ForeignKey('Goods.id'))
     cust_id = db.Column(db.Integer, db.ForeignKey('Customer.id'), index=True)
