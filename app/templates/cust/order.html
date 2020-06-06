@@ -6,6 +6,7 @@
     数量 {{ order.quantity }}<br>
     付款金额 <span style="color: red;">￥{{ order.cost }}</span><br>
     订单状态 {{ status }}<br>
+    收货地址 {{ order.shipaddr }}<br>
     {% if order.admin_id %}
     管理员ID {{ order.admin_id }}
     {% else %}
