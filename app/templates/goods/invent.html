@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>
+库存盘点
+</p>
+<p>
+    商品 {{ goods.goods.name }}<br>
+    系统库存 {{ goods.real_stock }}<br>
+</p>
+<form action="" method="post">
+    {{ form.csrf_token }}
+    <p>
+        {{ form.stock.label }}<br>
+        {{ form.stock(size=32, required=false) }}<br>
+        <span style="color: red;">{{ form.stock.errors[0] }}</span>
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}

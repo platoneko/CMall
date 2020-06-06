@@ -11,7 +11,7 @@ class Customer(db.Model):
     tel = db.Column(db.String(11))
     pwd = db.Column(db.String(128))
     addrs = db.relationship('ShipAddr')
-    orders = db.relationship('CustOrder', lazy='dynamic')
+    orders = db.relationship('CustOrder', backref='cust', lazy='dynamic')
 
     @property
     def is_active(self):
@@ -100,7 +100,7 @@ class Goods(db.Model):
     __tablename__ = 'Goods'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(30))
-    detail = db.relationship('GoodsDetail', backref='goods')
+    detail = db.relationship('GoodsDetail', backref='goods', uselist=False)
 
 
 class GoodsDetail(db.Model):
@@ -148,3 +148,14 @@ class Appraisal(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('CustOrder.id'), index=True)
     create_time = db.Column(db.DateTime, default=datetime.datetime.now())
     content = db.Column(db.String(100))
+
+
+class Inventory(db.Model):
+    __tablename__ = 'Inventory'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    create_time = db.Column(db.DateTime, default=datetime.datetime.now())
+    goods_id = db.Column(db.Integer, db.ForeignKey('Goods.id'))
+    admin_id = db.Column(db.String(16), db.ForeignKey('Admin.id'))
+    goods_stock = db.Column(db.Integer)
+    stock = db.Column(db.Integer)
+    goods = db.relationship('Goods', uselist=False)

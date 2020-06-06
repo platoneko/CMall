@@ -15,6 +15,7 @@
     {{ goods.goods.name }}
     {% if g.user.privilege %}
     <a href="/goods/delete/{{ goods.id }}">删除</a>
+    <a href="/goods/invent/{{ goods.id }}">盘点库存</a>
     {% endif %}<br>
     价格  <span style="color: red;">￥{{ goods.sale_price }}</span><br>
     库存 {{ goods.stock }} | 销量 {{ goods.sales_num }} | 评分
@@ -39,13 +40,13 @@
     {% if result_list %}
     <ul>
     {% for result in result_list %}
-    用户 {{ result.name }} 评分:{{ result.score }}<br>
+    用户 {{ result.name }} 评分 {{ result.score }}<br>
     {% if result.content %}
     {{ result.content }}<br>
     {% else %}
     用户未填写评价内容<br>
     {% endif %}
-    日期:{{ result.create_time.date() }}<br>
+    日期 {{ result.create_time.date() }}<br>
     <br>
     {% endfor %}
     </ul>

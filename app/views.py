@@ -4,9 +4,10 @@ from flask import render_template, redirect, request, flash, g, session, abort
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db
 from .forms import LoginForm, RegisterForm, AddGoodsForm, CateForm, BrandForm, \
-    ValidationForm, AddrForm, PurchaseForm, AppraisalForm, AdminRegisterForm
+    ValidationForm, AddrForm, PurchaseForm, AppraisalForm, AdminRegisterForm, \
+    InventoryForm
 from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, \
-    Image, ShipAddr, CustOrder, Appraisal
+    Image, ShipAddr, CustOrder, Appraisal, Inventory
 from .utils import random_filename
 
 
@@ -266,7 +267,7 @@ def goods_delete(id):
 @login_required
 def cust_addr():
     if g.user.privilege:
-        redirect('/index')
+        return redirect('/index')
     form = AddrForm()
     if form.validate_on_submit():
         province = request.form.get('province')
@@ -286,7 +287,7 @@ def cust_addr():
 @login_required
 def addr_delete(id):
     if g.user.privilege:
-        redirect('/index')
+        return redirect('/index')
     addr = ShipAddr.query.get(id)
     if addr.cust_id != g.user.id:
         abort(403)
@@ -300,16 +301,17 @@ def addr_delete(id):
 @login_required
 def purchase(id):
     if g.user.privilege:
-        redirect('/index')
-    if g.user.addrs is None:
-        redirect('/cust/addr')
+        return redirect('/index')
+    addrs = g.user.addrs
+    if not addrs:
+        return redirect('/cust/addr')
     goods = GoodsDetail.query.get_or_404(id)
     if goods.stock == 0:
         flash('商品库存不足')
         return redirect(f'/goods/index/{id}')
     form = PurchaseForm()
     addr_choices = []
-    for addr in g.user.addrs:
+    for addr in addrs:
         addr_choices.append((addr.id, addr.addr))
     form.addr.choices = addr_choices
     if form.validate_on_submit():
@@ -331,7 +333,7 @@ def purchase(id):
 @login_required
 def payment(id):
     if g.user.privilege:
-        redirect('/index')
+        return redirect('/index')
     order = CustOrder.query.get_or_404(id)
     if order.cust_id != g.user.id:
         abort(403)
@@ -345,7 +347,7 @@ def payment(id):
 @login_required
 def paying(id):
     if g.user.privilege:
-        redirect('/index')
+        return redirect('/index')
     order = CustOrder.query.get_or_404(id)
     if order.status != 0:
         abort(404)
@@ -371,7 +373,7 @@ def paying(id):
 @login_required
 def cust_orders(status):
     if g.user.privilege:
-        redirect('/index')
+        return redirect('/index')
     status = int(status)
     if status < 0 or status > 4:
         abort(404)
@@ -391,7 +393,7 @@ def cust_orders(status):
 @login_required
 def cust_order(id):
     if g.user.privilege:
-        redirect('/index')
+        return redirect('/index')
     order = CustOrder.query.get_or_404(id)
     if order.cust_id != g.user.id:
         abort(403)
@@ -410,7 +412,7 @@ def cust_order(id):
 @login_required
 def order_delete(id):
     if g.user.privilege:
-        redirect('/index')
+        return redirect('/index')
     order = CustOrder.query.get_or_404(id)
     if order.cust_id != g.user.id:
         abort(403)
@@ -426,7 +428,7 @@ def order_delete(id):
 @login_required
 def signed(id):
     if g.user.privilege:
-        redirect('/index')
+        return redirect('/index')
     order = CustOrder.query.get_or_404(id)
     if order.cust_id != g.user.id:
         abort(403)
@@ -505,7 +507,9 @@ def admin_order(id):
     else:
         status = order.status
     appraisal = order.appraisal
-    return render_template('admin/order.html', order=order, status=status, appraisal=appraisal)
+    goods = order.goods
+    stock = goods.detail.real_stock
+    return render_template('admin/order.html', order=order, status=status, appraisal=appraisal, name=goods.name, stock=stock)
 
 
 @app.route('/admin/order/manage/<id>')
@@ -559,3 +563,32 @@ def admin_register():
         flash('注册成功')
         return redirect('/index')
     return render_template('admin/register.html', form=form)
+
+
+@app.route('/goods/invent/<id>', methods=['GET', 'POST'])
+@login_required
+def goods_invent(id):
+    if g.user.privilege < 50:
+        abort(403)
+    goods = GoodsDetail.query.get_or_404(id)
+    form = InventoryForm()
+    if form.validate_on_submit():
+        inventory = Inventory(
+            goods_id=id,
+            admin_id=g.user.id,
+            goods_stock=goods.real_stock,
+            stock=form.stock.data
+        )
+        db.session.add(inventory)
+        db.session.commit()
+        return redirect('/admin/inventory')
+    return render_template('goods/invent.html', form=form, goods=goods)
+
+
+@app.route('/admin/inventory')
+@login_required
+def inventory():
+    if g.user.privilege < 50:
+        abort(403)
+    inventories = Inventory.query.order_by(Inventory.id.desc()).all()
+    return render_template('admin/inventory.html', inventories=inventories)

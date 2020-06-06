@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>历史盘点数据</p>
+<table width="50%" border="1" cellspacing="1" cellpadding="4" align="left">
+<tr>
+    <th>商品</th>
+    <th>系统库存</th>
+    <th>实际库存</th>
+    <th>盘点时间</th>
+    <th>管理员</th>
+</tr>
+{% for inventory in inventories %}
+<tr>
+    <td>{{ inventory.goods.name }}</td>
+    {% if inventory.goods_stock != inventory.stock %}
+    <td><span style="color: red;">{{ inventory.goods_stock }}</span></td>
+    <td><span style="color: red;">{{ inventory.stock }}</span></td>
+    {% else %}
+    <td>{{ inventory.goods_stock }}</td>
+    <td>{{ inventory.stock }}</td>
+    {% endif %}
+    <td>{{ inventory.create_time }}</td>
+    <td>{{ inventory.admin_id }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

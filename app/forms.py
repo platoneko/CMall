@@ -143,3 +143,10 @@ class AdminRegisterForm(FlaskForm):
         DataRequired('非法的输入'),
         NumberRange(1, 100, '请输入1~100的整数')])
     submit = SubmitField('确认注册')
+
+
+class InventoryForm(FlaskForm):
+    stock = IntegerField('实际库存', validators=[
+        DataRequired('非法的输入'),
+        NumberRange(1, 100000, message='库存必须在1~100000之间')])
+    submit = SubmitField('提交')
