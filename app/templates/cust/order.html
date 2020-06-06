@@ -2,14 +2,7 @@
 
 {% block content %}
 <p>
-    {{ order.goods.name }}
-    {% if order.status == 0 %}
-    <a href="/cust/order/delete/{{ order.id }}">[取消订单]</a>
-    <a href="/cust/payment/{{ order.id }}">[去付款]</a>
-    {% elif order.status == 3 %}
-    <a href="/cust/appraisal/{{ order.id }}">[去评价]</a>
-    {% endif %}
-    <br>
+    {{ order.goods.name }}<br>
     数量 {{ order.quantity }}<br>
     付款金额 <span style="color: red;">￥{{ order.cost }}</span><br>
     订单状态 {{ status }}<br>
@@ -26,5 +19,13 @@
     支付时间 -
     {% endif %}
     <br>
+    {% if order.status == 0 %}
+    <a href="/cust/order/delete/{{ order.id }}">[取消订单]</a>
+    <a href="/cust/payment/{{ order.id }}">[去付款]</a>
+    {% elif order.status == 2 %}
+    <a href="/cust/signed/{{ order.id }}">[去签收]</a>
+    {% elif order.status == 3 %}
+    <a href="/cust/appraisal/{{ order.id }}">[去评价]</a>
+    {% endif %}
 </p>
 {% endblock %}

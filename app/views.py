@@ -100,7 +100,7 @@ def logout():
 @app.route('/goods/add', methods=['GET', 'POST'])
 @login_required
 def goods_add():
-    if (g.user.privilege < 100):
+    if g.user.privilege < 100:
         abort(403)
     form = AddGoodsForm()
     categories = Category.query.all()
@@ -141,7 +141,7 @@ def goods_add():
 @app.route('/cate/edit', methods=['GET', 'POST'])
 @login_required
 def cate_edit():
-    if (g.user.privilege < 100):
+    if g.user.privilege < 100:
         abort(403)
     form = CateForm()
     if form.validate_on_submit():
@@ -160,7 +160,7 @@ def cate_edit():
 @app.route('/brand/edit', methods=['GET', 'POST'])
 @login_required
 def brand_edit():
-    if (g.user.privilege < 100):
+    if g.user.privilege < 100:
         abort(403)
     form = BrandForm()
     if form.validate_on_submit():
@@ -179,7 +179,7 @@ def brand_edit():
 @app.route('/cate/delete/<id>', methods=['GET', 'POST'])
 @login_required
 def cate_delete(id):
-    if (g.user.privilege < 100):
+    if g.user.privilege < 100:
         abort(403)
     cate = Category.query.get_or_404(id)
     form = ValidationForm()
@@ -201,7 +201,7 @@ def cate_delete(id):
 @app.route('/brand/delete/<id>', methods=['GET', 'POST'])
 @login_required
 def brand_delete(id):
-    if (g.user.privilege < 100):
+    if g.user.privilege < 100:
         abort(403)
     brand = Brand.query.get_or_404(id)
     form = ValidationForm()
@@ -223,7 +223,7 @@ def brand_delete(id):
 @app.route('/goods/delete/<id>', methods=['GET', 'POST'])
 @login_required
 def goods_delete(id):
-    if (g.user.privilege < 100):
+    if g.user.privilege < 100:
         abort(403)
     goods = GoodsDetail.query.get_or_404(id)
     form = ValidationForm()
@@ -245,7 +245,7 @@ def goods_delete(id):
 @app.route('/cust/addr', methods=['GET', 'POST'])
 @login_required
 def cust_addr():
-    if (g.user.privilege):
+    if g.user.privilege:
         redirect('/index')
     form = AddrForm()
     if form.validate_on_submit():
@@ -265,7 +265,7 @@ def cust_addr():
 @app.route('/cust/addr/delete/<id>')
 @login_required
 def addr_delete(id):
-    if (g.user.privilege):
+    if g.user.privilege:
         redirect('/index')
     addr = ShipAddr.query.get(id)
     if addr.cust_id != g.user.id:
@@ -279,7 +279,7 @@ def addr_delete(id):
 @app.route('/cust/purchase/<id>', methods=['GET', 'POST'])
 @login_required
 def purchase(id):
-    if (g.user.privilege):
+    if g.user.privilege:
         redirect('/index')
     if g.user.addrs is None:
         redirect('/cust/addr')
@@ -310,7 +310,7 @@ def purchase(id):
 @app.route('/cust/payment/<id>')
 @login_required
 def payment(id):
-    if (g.user.privilege):
+    if g.user.privilege:
         redirect('/index')
     order = CustOrder.query.get_or_404(id)
     if order.cust_id != g.user.id:
@@ -324,7 +324,7 @@ def payment(id):
 @app.route('/cust/paying/<id>')
 @login_required
 def paying(id):
-    if (g.user.privilege):
+    if g.user.privilege:
         redirect('/index')
     order = CustOrder.query.get_or_404(id)
     if order.status != 0:
@@ -350,8 +350,11 @@ def paying(id):
 @app.route('/cust/orders/<status>')
 @login_required
 def cust_orders(status):
-    if (g.user.privilege):
+    if g.user.privilege:
         redirect('/index')
+    status = int(status)
+    if status < 0 or status > 4:
+        abort(404)
     msg = [
         '未付款订单',
         '待发货订单',
@@ -360,14 +363,14 @@ def cust_orders(status):
         '已完成订单'
     ]
     orders = CustOrder.query.filter_by(cust_id=g.user.id, status=status). \
-        order_by(CustOrder.create_time.desc()).all()
-    return render_template('/cust/orders.html', orders=orders, msg=msg[int(status)])
+        order_by(CustOrder.id.desc()).all()
+    return render_template('/cust/orders.html', orders=orders, msg=msg[status])
 
 
 @app.route('/cust/order/<id>')
 @login_required
 def cust_order(id):
-    if (g.user.privilege):
+    if g.user.privilege:
         redirect('/index')
     order = CustOrder.query.get_or_404(id)
     if order.cust_id != g.user.id:
@@ -385,12 +388,99 @@ def cust_order(id):
 @app.route('/cust/order/delete/<id>')
 @login_required
 def order_delete(id):
-    if (g.user.privilege):
+    if g.user.privilege:
         redirect('/index')
     order = CustOrder.query.get_or_404(id)
     if order.cust_id != g.user.id:
         abort(403)
+    if order.status != 0:
+        abort(404)
     db.session.delete(order)
     db.session.commit()
     flash('订单已取消')
     return redirect(f'/cust/orders/0')
+
+
+@app.route('/cust/signed/<id>')
+@login_required
+def signed(id):
+    if g.user.privilege:
+        redirect('/index')
+    order = CustOrder.query.get_or_404(id)
+    if order.cust_id != g.user.id:
+        abort(403)
+    if order.status != 2:
+        abort(404)
+    order.status = 3
+    db.session.commit()
+    return redirect(f'/cust/orders/3')
+
+
+@app.route('/admin/orders/<status>')
+@login_required
+def admin_orders(status):
+
+    status = int(status)
+    if status < 0 or status > 4:
+        abort(404)
+    msg = [
+        '待处理订单',
+        '待发货订单',
+        '待签收订单',
+        '待评价订单',
+        '已完成订单'
+    ]
+    if status == 0:
+        orders = CustOrder.query.filter_by(admin_id=None, status=1). \
+            order_by(CustOrder.id.desc()).all()
+    else:
+        orders = CustOrder.query.filter_by(admin_id=g.user.id, status=status). \
+            order_by(CustOrder.id.desc()).all()
+    return render_template('admin/orders.html', orders=orders, msg=msg[status])
+
+
+@app.route('/admin/order/<id>')
+@login_required
+def admin_order(id):
+    if g.user.privilege < 50:
+        abort(403)
+    order = CustOrder.query.get_or_404(id)
+    if order.admin_id and order.admin_id != g.user.id:
+        abort(403)
+    if order.admin_id is None:
+        status = 0
+    else:
+        status = order.status
+    return render_template('admin/order.html', order=order, status=status)
+
+
+@app.route('/admin/order/manage/<id>')
+@login_required
+def admin_order_manage(id):
+    if g.user.privilege < 50:
+        abort(403)
+    order = db.session.query(CustOrder).with_for_update().get(id)
+    if order is None:
+        abort(404)
+    if order.admin_id is not None:
+        db.session.commit()
+        flash('订单已经有管理员处理')
+        return redirect('/admin/orders/0')
+    order.admin_id = g.user.id
+    db.session.commit()
+    return redirect('/admin/orders/1')
+
+
+@app.route('/admin/ship/<id>')
+@login_required
+def admin_ship(id):
+    if g.user.privilege < 50:
+        abort(403)
+    order = CustOrder.query.get_or_404(id)
+    if order.admin_id != g.user.id:
+        abort(403)
+    if order.status != 1:
+        abort(404)
+    order.status = 2
+    db.session.commit()
+    return redirect('/admin/orders/2')

@@ -44,7 +44,7 @@ class Admin(db.Model):
     id = db.Column(db.String(8), primary_key=True)
     pwd = db.Column(db.String(128))
     privilege = db.Column(db.SmallInteger)
-    orders = db.relationship('CustOrder')
+    orders = db.relationship('CustOrder', lazy='dynamic')
 
     @property
     def is_active(self):
@@ -129,7 +129,7 @@ class CustOrder(db.Model):
     cust_id = db.Column(db.Integer, db.ForeignKey('Customer.id'), index=True)
     admin_id = db.Column(db.Integer, db.ForeignKey('Admin.id'), index=True)
     shipaddr_id = db.Column(db.Integer, db.ForeignKey('ShipAddr.id'))
-    status = db.Column(db.SmallInteger, default=0)
+    status = db.Column(db.SmallInteger, default=0, index=True)
     quantity = db.Column(db.SmallInteger)
     cost = db.Column(db.DECIMAL(8, 2))
     goods = db.relationship('Goods', uselist=False)

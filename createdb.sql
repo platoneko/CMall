@@ -103,6 +103,8 @@ CREATE TABLE CustOrder (
 
 CREATE INDEX cust_id_index ON CustOrder (cust_id(8));
 CREATE INDEX admin_id_index ON CustOrder (admin_id(8));
+USE CMall;
+CREATE INDEX status ON CustOrder (status);
 
 USE CMall;
 -- 客户评价表

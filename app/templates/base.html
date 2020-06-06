@@ -4,11 +4,12 @@
         {% if g.user.is_authenticated %}
             {% if g.user.privilege %}
                 <p>Hi，管理员 {{ g.user.id }}</p>
-                <a href="#">我管理的订单</a>
+                <a href="/admin/orders/1">我管理的订单</a>
+                <a href="/admin/orders/0">待处理的订单</a>
                 <a href="/goods/add">添加商品</a>
                 <a href="/cate/edit">编辑分类</a>
                 <a href="/brand/edit">编辑品牌</a>
-                <a href="/auth/logout">退出</a>
+                <a href="/logout">退出</a>
             {% else %}
                 <p>Hi，{{ g.user.name }}</p>
                 <a href="/cust/orders/4">我的订单</a>
