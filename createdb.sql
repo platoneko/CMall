@@ -112,8 +112,8 @@ CREATE TABLE Appraisal (
 	id INT  PRIMARY KEY AUTO_INCREMENT,
 	score SMALLINT,
 	order_id INT ,
-	create_date DATETIME,
-	description VARCHAR (100),
+	create_time DATETIME,
+	content VARCHAR (100),
 	FOREIGN KEY (order_id) REFERENCES CustOrder (id) ON DELETE CASCADE ON UPDATE CASCADE,
 	CHECK (score >= 1 AND score <= 5)
 );
@@ -124,7 +124,7 @@ USE CMall;
 -- 管理员盘点表
 CREATE TABLE Inventory (
 	id INT  PRIMARY KEY AUTO_INCREMENT,
-	create_date DATETIME,
+	create_time DATETIME,
 	goods_id INT ,
 	admin_id CHAR (8),
 	stock INT ,

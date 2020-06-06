@@ -19,6 +19,18 @@
     支付时间 -
     {% endif %}
     <br>
+    {% if appraisal %}
+    <p>
+    评分 {{ appraisal.score }}<br>
+    评价内容<br>
+    {% if appraisal.content %}
+    {{ appraisal.content }}<br>
+    {% else %}
+    用户未填写评价内容<br>
+    {% endif %}
+    评价时间 {{ appraisal.create_time }}<br>
+    </p>
+    {% endif %}
     {% if order.status == 0 %}
     <a href="/cust/order/delete/{{ order.id }}">[取消订单]</a>
     <a href="/cust/payment/{{ order.id }}">[去付款]</a>

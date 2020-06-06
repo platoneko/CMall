@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>
+    用户评价
+</p>
+<form action="" method="post">
+    {{ form.csrf_token }}
+    <p>
+        {{ form.score.label }}<br>
+        {{ form.score(required=false) }}<br>
+        <span style="color: red;">{{ form.score.errors[0] }}</span>
+    </p>
+    <p>
+        {{ form.content.label }}<br>
+        {{ form.content(cols=32, rows=4, required=false) }}<br>
+        <span style="color: red;">{{ form.content.errors[0] }}</span>
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}

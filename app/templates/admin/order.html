@@ -9,6 +9,18 @@
     付款金额 <span style="color: red;">￥{{ order.cost }}</span><br>
     创建时间 {{ order.create_time }}<br>
     支付时间 {{ order.pay_time }}<br>
+    {% if appraisal %}
+    <p>
+    评分 {{ appraisal.score }}<br>
+    评价内容<br>
+    {% if appraisal.content %}
+    {{ appraisal.content }}<br>
+    {% else %}
+    用户未填写评价内容<br>
+    {% endif %}
+    评价时间 {{ appraisal.create_time }}<br>
+    </p>
+    {% endif %}
     {% if status == 0 %}
     <a href="/admin/order/manage/{{ order.id }}">[加入我管理的订单]</a>
     {% elif order.status == 1 %}

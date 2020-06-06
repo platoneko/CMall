@@ -132,5 +132,15 @@ class CustOrder(db.Model):
     status = db.Column(db.SmallInteger, default=0, index=True)
     quantity = db.Column(db.SmallInteger)
     cost = db.Column(db.DECIMAL(8, 2))
-    goods = db.relationship('Goods', uselist=False)
+    goods = db.relationship('Goods', backref='orders', uselist=False)
     shipaddr = db.relationship('ShipAddr', uselist=False)
+    appraisal = db.relationship('Appraisal', backref='order', uselist=False)
+
+
+class Appraisal(db.Model):
+    __tablename__ = 'Appraisal'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    score = db.Column(db.SmallInteger)
+    order_id = db.Column(db.Integer, db.ForeignKey('CustOrder.id'), index=True)
+    create_time = db.Column(db.DateTime, default=datetime.datetime.now())
+    content = db.Column(db.String(100))

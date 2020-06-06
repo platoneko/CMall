@@ -4,9 +4,9 @@ from flask import render_template, redirect, request, flash, g, session, abort
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db
 from .forms import LoginForm, RegisterForm, AddGoodsForm, CateForm, BrandForm, \
-    ValidationForm, AddrForm, PurchaseForm
+    ValidationForm, AddrForm, PurchaseForm, AppraisalForm
 from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, \
-    Image, ShipAddr, CustOrder
+    Image, ShipAddr, CustOrder, Appraisal
 from .utils import random_filename
 
 
@@ -44,7 +44,25 @@ def goods(id):
     goods = GoodsDetail.query.get_or_404(id)
     cate_name = goods.cate.name
     brand_name = goods.brand.name
-    return render_template('/goods/index.html', goods=goods, cate_name=cate_name, brand_name=brand_name)
+    sql = f"""
+        SELECT Customer.name, score, Appraisal.create_time, content
+        FROM CustOrder, Appraisal, Customer
+        WHERE (goods_id = {id} AND
+          CustOrder.id = Appraisal.order_id AND
+          Customer.id = CustOrder.cust_id)
+    """
+    result_list = db.session.execute(sql).fetchall()
+    avg_score = 0
+    for result in result_list:
+        avg_score += result.score
+    avg_score = round(avg_score/len(result_list), 1)
+    return render_template(
+        '/goods/index.html',
+        goods=goods,
+        cate_name=cate_name,
+        brand_name=brand_name,
+        score=avg_score,
+        result_list=result_list)
 
 
 @app.route('/auth/login', methods=['GET', 'POST'])
@@ -59,10 +77,10 @@ def login():
             user = Customer.query.get(form.user.data)
         if user is None:
             flash('用户名不存在')
-            return redirect('/login')
+            return redirect('/auth/login')
         if not user.check_pwd(form.password.data):
             flash('密码错误')
-            return redirect('/login')
+            return redirect('/auth/login')
         if form.is_admin.data:
             session['is_admin'] = True
         else:
@@ -382,7 +400,8 @@ def cust_order(id):
         '待评价',
         '已完成'
     ]
-    return render_template('cust/order.html', order=order, status=status[order.status])
+    appraisal = order.appraisal
+    return render_template('cust/order.html', order=order, status=status[order.status], appraisal=appraisal)
 
 
 @app.route('/cust/order/delete/<id>')
@@ -416,10 +435,41 @@ def signed(id):
     return redirect(f'/cust/orders/3')
 
 
+@app.route('/cust/appraisal/<id>', methods=['GET', 'POST'])
+@login_required
+def appraisal(id):
+    if g.user.privilege:
+        redirect('/index')
+    order = db.session.query(CustOrder).with_for_update().get(id)
+    if order.goods.detail is None:
+        order.status = 4
+        db.session.commit()
+        flash('商品已下架，订单完成')
+        return redirect('/cust/orders/4')
+    if order.status == 4:
+        db.session.commit()
+        flash('订单已完成，请勿重复发表评价')
+        return redirect('/cust/orders/4')
+    if order.status != 3:
+        db.session.commit()
+        abort(404)
+    form = AppraisalForm()
+    if form.validate_on_submit():
+        appraisal = Appraisal(
+            score=form.score.data,
+            order_id=id,
+            content=form.content.data)
+        db.session.add(appraisal)
+        order.status = 4
+        db.session.commit()
+        flash('评价提交成功，订单完成')
+        return redirect('/cust/orders/4')
+    db.session.commit()
+    return render_template('cust/appraisal.html', form=form)
+
 @app.route('/admin/orders/<status>')
 @login_required
 def admin_orders(status):
-
     status = int(status)
     if status < 0 or status > 4:
         abort(404)
@@ -451,7 +501,8 @@ def admin_order(id):
         status = 0
     else:
         status = order.status
-    return render_template('admin/order.html', order=order, status=status)
+    appraisal = order.appraisal
+    return render_template('admin/order.html', order=order, status=status, appraisal=appraisal)
 
 
 @app.route('/admin/order/manage/<id>')
@@ -461,6 +512,7 @@ def admin_order_manage(id):
         abort(403)
     order = db.session.query(CustOrder).with_for_update().get(id)
     if order is None:
+        db.session.commit()
         abort(404)
     if order.admin_id is not None:
         db.session.commit()

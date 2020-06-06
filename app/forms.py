@@ -116,3 +116,14 @@ class PurchaseForm(FlaskForm):
         NumberRange(1, 99, '一次性购买数量不能超过99')])
     addr = SelectField('收货地址', validators=[DataRequired('地址不能为空')], coerce=int)
     submit = SubmitField('提交订单')
+
+
+class AppraisalForm(FlaskForm):
+    score = SelectField(
+        '总体评分',
+        validators=[DataRequired('评分不能为空')],
+        choices=[(1, '很差'), (2, '较差'), (3, '一般'), (4, '推荐'), (5, '力荐')],
+        coerce=int,
+        default=4)
+    content = TextAreaField('内容', validators=[Length(0, 100, message='评价内容不得超过100个字符')])
+    submit = SubmitField('发表评价')
