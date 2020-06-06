@@ -58,6 +58,7 @@ CREATE TABLE GoodsDetail (
 	purchase_price DECIMAL (8, 2),
 	sale_price DECIMAL (8, 2),
 	stock INT ,
+	real_stock INT,
 	sales_num INT ,
 	description VARCHAR (500),
 	FOREIGN KEY (id) REFERENCES Goods (id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -125,6 +126,7 @@ CREATE TABLE Inventory (
 	create_time DATETIME,
 	goods_id INT ,
 	admin_id CHAR (16),
+	goods_stock INT,
 	stock INT ,
 	FOREIGN KEY (goods_id) REFERENCES Goods (id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (admin_id) REFERENCES Admin (id) ON DELETE CASCADE ON UPDATE CASCADE

@@ -111,6 +111,7 @@ class GoodsDetail(db.Model):
     purchase_price = db.Column(db.DECIMAL(8, 2))
     sale_price = db.Column(db.DECIMAL(8, 2))
     stock = db.Column(db.Integer)
+    real_stock = db.Column(db.Integer)
     sales_num = db.Column(db.Integer)
     description = db.Column(db.String(500))
     images = db.relationship('Image', backref='goods', lazy='dynamic', cascade='delete')

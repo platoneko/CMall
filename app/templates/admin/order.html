@@ -5,7 +5,7 @@
     {{ order.goods.name }}<br>
     订单号 {{ order.id }}<br>
     顾客ID {{ order.cust_id }}<br>
-    数量 {{ order.quantity }}<br>
+    数量 {{ order.quantity }} | 实际库存 {{ order.goods.detail.real_stock }}<br>
     付款金额 <span style="color: red;">￥{{ order.cost }}</span><br>
     收货地址 {{ order.shipaddr }}<br>
     创建时间 {{ order.create_time }}<br>

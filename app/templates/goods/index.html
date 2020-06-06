@@ -17,7 +17,12 @@
     <a href="/goods/delete/{{ goods.id }}">删除</a>
     {% endif %}<br>
     价格  <span style="color: red;">￥{{ goods.sale_price }}</span><br>
-    库存 {{ goods.stock }} | 销量 {{ goods.sales_num }} | 评分 {{ score }}<br>
+    库存 {{ goods.stock }} | 销量 {{ goods.sales_num }} | 评分
+    {% if score %}
+    {{ score }}
+    {% else %}
+    暂无评分
+    {% endif %}<br>
     品牌 {{ brand_name }} | 类别 {{ cate_name }}<br>
     {% if g.user.privilege == 0 %}
     <a href="/cust/purchase/{{ goods.id }}">立即购买</a>
@@ -31,6 +36,7 @@
 </p>
 <p>
     顾客评价
+    {% if result_list %}
     <ul>
     {% for result in result_list %}
     用户 {{ result.name }} 评分:{{ result.score }}<br>
@@ -43,5 +49,8 @@
     <br>
     {% endfor %}
     </ul>
+    {% else %}
+    暂无评价
+    {% endif %}
 </p>
 {% endblock %}

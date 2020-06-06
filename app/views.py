@@ -53,9 +53,10 @@ def goods(id):
     """
     result_list = db.session.execute(sql).fetchall()
     avg_score = 0
-    for result in result_list:
-        avg_score += result.score
-    avg_score = round(avg_score/len(result_list), 1)
+    if result_list:
+        for result in result_list:
+            avg_score += result.score
+        avg_score = round(avg_score/len(result_list), 1)
     return render_template(
         '/goods/index.html',
         goods=goods,
@@ -144,6 +145,7 @@ def goods_add():
             purchase_price=form.purchase_price.data,
             sale_price=form.sale_price.data,
             stock=form.stock.data,
+            real_stock=form.stock.data,
             sales_num=0,
             description=form.description.data)
         db.session.add(goods_detail)
@@ -535,6 +537,7 @@ def admin_ship(id):
     if order.status != 1:
         abort(404)
     order.status = 2
+    order.goods.detail.real_stock -= order.quantity
     db.session.commit()
     return redirect('/admin/orders/2')
 
