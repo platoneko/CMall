@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+        {{ message }}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+<p>
+    <a href="/cust/orders/0">未付款</a>
+    <a href="/cust/orders/1">待发货</a>
+    <a href="/cust/orders/2">待签收</a>
+    <a href="/cust/orders/3">待评价</a>
+    <a href="/cust/orders/4">已完成</a>
+</p>
+<p>{{ msg }}</p>
+<ul>
+{% for order in orders %}
+    {{ order.goods.name }} 创建时间{{ order.create_time }} 数量{{ order.quantity }} 付款金额￥{{ order.cost }}
+    <a href="/cust/order/{{ order.id }}">
+        [详情]
+    </a>
+{% endfor %}
+</ul>
+{% endblock %}

@@ -117,7 +117,7 @@ function getCity(currProvince)
 <ol>
     {% for addr in addrs %}
     <li>
-        {{ addr.addr }}<a href="/del_addr/{{ addr.id }}">[删除]</a>
+        {{ addr.addr }}<a href="/cust/addr/delete/{{ addr.id }}">[删除]</a>
     </li>
     {% endfor %}
 </ol>

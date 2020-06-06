@@ -25,29 +25,29 @@ def index():
                            brands=brands)
 
 
-@app.route('/cate/<id>')
+@app.route('/cate/index/<id>')
 def cate(id):
     cate = Category.query.get_or_404(id)
     goods_list = cate.goods
-    return render_template('/cate.html', name=cate.name, goods_list=goods_list)
+    return render_template('/cate/index.html', name=cate.name, goods_list=goods_list)
 
 
-@app.route('/brand/<id>')
+@app.route('/brand/index/<id>')
 def brand(id):
     brand = Brand.query.get_or_404(id)
     goods_list = brand.goods
-    return render_template('/brand.html', name=brand.name, goods_list=goods_list)
+    return render_template('/brand/index.html', name=brand.name, goods_list=goods_list)
 
 
-@app.route('/goods/<id>', methods=['GET', 'POST'])
+@app.route('/goods/index/<id>', methods=['GET', 'POST'])
 def goods(id):
     goods = GoodsDetail.query.get_or_404(id)
     cate_name = goods.cate.name
     brand_name = goods.brand.name
-    return render_template('/goods.html', goods=goods, cate_name=cate_name, brand_name=brand_name)
+    return render_template('/goods/index.html', goods=goods, cate_name=cate_name, brand_name=brand_name)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/auth/login', methods=['GET', 'POST'])
 def login():
     if g.user.is_authenticated:
         return redirect('/index')
@@ -69,10 +69,10 @@ def login():
             session['is_admin'] = False
         login_user(user, remember=False)
         return redirect('/index')
-    return render_template('/login.html', form=form)
+    return render_template('/auth/login.html', form=form)
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/auth/register', methods=['GET', 'POST'])
 def register():
     if g.user.is_authenticated:
         return redirect('/index')
@@ -80,14 +80,14 @@ def register():
     if form.validate_on_submit():
         if Customer.query.get(form.user.data):
             flash('该用户名已被注册')
-            return redirect('/register')
+            return redirect('/auth/register')
         user = Customer(id=form.user.data, name=form.name.data, tel=form.tel.data)
         user.set_pwd(form.password.data)
         db.session.add(user)
         db.session.commit()
         flash('注册成功')
-        return redirect('/login')
-    return render_template('/register.html', form=form)
+        return redirect('/auth/login')
+    return render_template('/auth/register.html', form=form)
 
 
 @app.route('/logout')
@@ -97,9 +97,9 @@ def logout():
     return redirect('/index')
 
 
-@app.route('/add_goods', methods=['GET', 'POST'])
+@app.route('/goods/add', methods=['GET', 'POST'])
 @login_required
-def add_goods():
+def goods_add():
     if (g.user.privilege < 100):
         abort(403)
     form = AddGoodsForm()
@@ -134,51 +134,51 @@ def add_goods():
         img.save(os.path.join(app.config['UPLOAD_PATH'], filename))
         db.session.commit()
         flash('商品添加成功')
-        return redirect('/add_goods')
-    return render_template('/add_goods.html', form=form)
+        return redirect('/goods/add')
+    return render_template('/goods/add.html', form=form)
 
 
-@app.route('/edit_cate', methods=['GET', 'POST'])
+@app.route('/cate/edit', methods=['GET', 'POST'])
 @login_required
-def edit_cate():
+def cate_edit():
     if (g.user.privilege < 100):
         abort(403)
     form = CateForm()
     if form.validate_on_submit():
         if Category.query.filter_by(name=form.name.data).first():
             flash(f'类别\"{form.name.data}\"已存在')
-            return redirect('/edit_cate')
+            return redirect('/cate/edit')
         else:
             db.session.add(Category(name=form.name.data))
             db.session.commit()
             flash('添加成功')
-            return redirect('/edit_cate')
+            return redirect('/cate/edit')
     categories = Category.query.all()
-    return render_template('/edit_cate.html', form=form, categories=categories)
+    return render_template('/cate/edit.html', form=form, categories=categories)
 
 
-@app.route('/edit_brand', methods=['GET', 'POST'])
+@app.route('/brand/edit', methods=['GET', 'POST'])
 @login_required
-def edit_brand():
+def brand_edit():
     if (g.user.privilege < 100):
         abort(403)
     form = BrandForm()
     if form.validate_on_submit():
         if Brand.query.filter_by(name=form.name.data).first():
             flash(f'品牌\"{form.name.data}\"已存在')
-            return redirect('/edit_brand')
+            return redirect('/brand/edit')
         else:
             db.session.add(Brand(name=form.name.data))
             db.session.commit()
             flash('添加成功')
-            return redirect('/edit_brand')
+            return redirect('/brand/edit')
     brands = Brand.query.all()
-    return render_template('/edit_brand.html', form=form, brands=brands)
+    return render_template('/brand/edit.html', form=form, brands=brands)
 
 
-@app.route('/del_cate/<id>', methods=['GET', 'POST'])
+@app.route('/cate/delete/<id>', methods=['GET', 'POST'])
 @login_required
-def del_cate(id):
+def cate_delete(id):
     if (g.user.privilege < 100):
         abort(403)
     cate = Category.query.get_or_404(id)
@@ -191,16 +191,16 @@ def del_cate(id):
             db.session.delete(cate)
             db.session.commit()
             flash(f'类别\"{cate.name}\"已被删除')
-            return redirect('/edit_cate')
+            return redirect('/cate/edit')
         else:
             flash('身份验证失败')
-            return redirect('/edit_cate')
-    return render_template('/validation.html', msg=f'正在删除类别\"{cate.name}\"', form=form)
+            return redirect('/cate/edit')
+    return render_template('/auth/validation.html', msg=f'正在删除类别\"{cate.name}\"', form=form)
 
 
-@app.route('/del_brand/<id>', methods=['GET', 'POST'])
+@app.route('/brand/delete/<id>', methods=['GET', 'POST'])
 @login_required
-def del_brand(id):
+def brand_delete(id):
     if (g.user.privilege < 100):
         abort(403)
     brand = Brand.query.get_or_404(id)
@@ -213,16 +213,16 @@ def del_brand(id):
             db.session.delete(brand)
             db.session.commit()
             flash(f'品牌\"{brand.name}\"已被删除')
-            return redirect('/edit_brand')
+            return redirect('/brand/edit')
         else:
             flash('身份验证失败')
-            return redirect('/edit_brand')
-    return render_template('/validation.html', msg=f'正在删除品牌\"{brand.name}\"', form=form)
+            return redirect('/brand/edit')
+    return render_template('/auth/validation.html', msg=f'正在删除品牌\"{brand.name}\"', form=form)
 
 
-@app.route('/del_goods/<id>', methods=['GET', 'POST'])
+@app.route('/goods/delete/<id>', methods=['GET', 'POST'])
 @login_required
-def del_goods(id):
+def goods_delete(id):
     if (g.user.privilege < 100):
         abort(403)
     goods = GoodsDetail.query.get_or_404(id)
@@ -239,12 +239,12 @@ def del_goods(id):
         else:
             flash('身份验证失败')
             return redirect('/index')
-    return render_template('/validation.html', msg=f'正在删除商品\"{name}\"', form=form)
+    return render_template('/auth/validation.html', msg=f'正在删除商品\"{name}\"', form=form)
 
 
-@app.route('/edit_addr', methods=['GET', 'POST'])
+@app.route('/cust/addr', methods=['GET', 'POST'])
 @login_required
-def edit_addr():
+def cust_addr():
     if (g.user.privilege):
         redirect('/index')
     form = AddrForm()
@@ -253,18 +253,18 @@ def edit_addr():
         city = request.form.get('city')
         if not province or not city:
             flash('省份或城市不能为空')
-            return redirect('/edit_addr')
+            return redirect('/cust/addr')
         db.session.add(ShipAddr(cust_id=g.user.id, addr=('').join([province, city, form.addr.data])))
         db.session.commit()
         flash('添加成功')
-        return redirect('/edit_addr')
+        return redirect('/cust/addr')
     addrs = g.user.addrs
-    return render_template('/edit_addr.html', addrs=addrs, form=form)
+    return render_template('/cust/addr.html', addrs=addrs, form=form)
 
 
-@app.route('/del_addr/<id>')
+@app.route('/cust/addr/delete/<id>')
 @login_required
-def del_addr(id):
+def addr_delete(id):
     if (g.user.privilege):
         redirect('/index')
     addr = ShipAddr.query.get(id)
@@ -273,20 +273,20 @@ def del_addr(id):
     addr.cust_id = None
     db.session.commit()
     flash('地址删除成功')
-    return redirect('/edit_addr')
+    return redirect('/cust/addr')
 
 
-@app.route('/purchase/<id>', methods=['GET', 'POST'])
+@app.route('/cust/purchase/<id>', methods=['GET', 'POST'])
 @login_required
 def purchase(id):
     if (g.user.privilege):
         redirect('/index')
     if g.user.addrs is None:
-        redirect('edit_addr')
+        redirect('/cust/addr')
     goods = GoodsDetail.query.get_or_404(id)
     if goods.stock == 0:
         flash('商品库存不足')
-        return redirect(f'/goods/{id}')
+        return redirect(f'/goods/index/{id}')
     form = PurchaseForm()
     addr_choices = []
     for addr in g.user.addrs:
@@ -303,11 +303,11 @@ def purchase(id):
         )
         db.session.add(order)
         db.session.commit()
-        return redirect(f'/payment/{order.id}')
-    return render_template('/purchase.html', form=form, goods=goods)
+        return redirect(f'/cust/payment/{order.id}')
+    return render_template('/cust/purchase.html', form=form, goods=goods)
 
 
-@app.route('/payment/<id>')
+@app.route('/cust/payment/<id>')
 @login_required
 def payment(id):
     if (g.user.privilege):
@@ -315,10 +315,13 @@ def payment(id):
     order = CustOrder.query.get_or_404(id)
     if order.cust_id != g.user.id:
         abort(403)
-    return render_template('/payment.html', order=order)
+    if order.goods.detail is None:
+        flash('商品已下架，订单取消')
+        return redirect(f'/cust/order/delete/{order.id}')
+    return render_template('/cust/payment.html', order=order)
 
 
-@app.route('/paying/<id>')
+@app.route('/cust/paying/<id>')
 @login_required
 def paying(id):
     if (g.user.privilege):
@@ -327,37 +330,41 @@ def paying(id):
     if order.status != 0:
         abort(404)
     goods = db.session.query(GoodsDetail).with_for_update().get(order.goods_id)
-    if goods.stock < order:
+    if goods is None:
+        db.session.commit()
+        flash('商品已下架，订单取消')
+        return redirect(f'/cust/order/delete/{order.id}')
+    if goods.stock < order.quantity:
         db.session.commit()
         flash('商品库存不足')
-        return redirect('/cust_orders/0')
+        return redirect('/cust/orders/0')
     goods.stock -= order.quantity
     goods.sales_num += order.quantity
     order.pay_time = datetime.datetime.now()
     order.status = 1
     db.session.commit()
     flash('支付成功')
-    return redirect('/cust_orders/1')
+    return redirect('/cust/orders/1')
 
 
-@app.route('/cust_orders/<status>')
+@app.route('/cust/orders/<status>')
 @login_required
 def cust_orders(status):
     if (g.user.privilege):
         redirect('/index')
     msg = [
         '未付款订单',
-        '已付款订单',
-        '已发货订单',
+        '待发货订单',
+        '待签收订单',
         '待评价订单',
         '已完成订单'
     ]
     orders = CustOrder.query.filter_by(cust_id=g.user.id, status=status). \
         order_by(CustOrder.create_time.desc()).all()
-    return render_template('/cust_orders.html', orders=orders, msg=msg[int(status)])
+    return render_template('/cust/orders.html', orders=orders, msg=msg[int(status)])
 
 
-@app.route('/cust_order/<id>')
+@app.route('/cust/order/<id>')
 @login_required
 def cust_order(id):
     if (g.user.privilege):
@@ -365,4 +372,25 @@ def cust_order(id):
     order = CustOrder.query.get_or_404(id)
     if order.cust_id != g.user.id:
         abort(403)
-    return render_template('cust_order.html', order=order)
+    status = [
+        '未付款',
+        '待发货',
+        '待签收',
+        '待评价',
+        '已完成'
+    ]
+    return render_template('cust/order.html', order=order, status=status[order.status])
+
+
+@app.route('/cust/order/delete/<id>')
+@login_required
+def order_delete(id):
+    if (g.user.privilege):
+        redirect('/index')
+    order = CustOrder.query.get_or_404(id)
+    if order.cust_id != g.user.id:
+        abort(403)
+    db.session.delete(order)
+    db.session.commit()
+    flash('订单已取消')
+    return redirect(f'/cust/orders/0')

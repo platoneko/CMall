@@ -5,7 +5,7 @@
 <p>品牌: {{ name }}</p>
 {% for goods in goods_list %}
     <p>
-        <a href="/goods/{{ goods.id }}">
+        <a href="/goods/index/{{ goods.id }}">
             <img src="{{ goods.images.first().url }}", height="200", width="200"><br>
             {{ goods.goods.name }}
         </a>

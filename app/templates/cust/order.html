@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>
+    {{ order.goods.name }}
+    {% if order.status == 0 %}
+    <a href="/cust/order/delete/{{ order.id }}">[取消订单]</a>
+    <a href="/cust/payment/{{ order.id }}">[去付款]</a>
+    {% elif order.status == 3 %}
+    <a href="/cust/appraisal/{{ order.id }}">[去评价]</a>
+    {% endif %}
+    <br>
+    数量 {{ order.quantity }}<br>
+    付款金额 <span style="color: red;">￥{{ order.cost }}</span><br>
+    订单状态 {{ status }}<br>
+    {% if order.admin_id %}
+    管理员ID {{ order.admin_id }}
+    {% else %}
+    管理员ID -
+    {% endif %}
+    <br>
+    创建时间 {{ order.create_time }}<br>
+    {% if order.pay_time %}
+    支付时间 {{ order.pay_time }}
+    {% else %}
+    支付时间 -
+    {% endif %}
+    <br>
+</p>
+{% endblock %}
