@@ -4,6 +4,9 @@
         {% if g.user.is_authenticated %}
             {% if g.user.privilege %}
                 <p>Hi，管理员 {{ g.user.id }}</p>
+                {% if g.user.privilege >= 100 %}
+                <a href="/admin/register">管理员注册</a>
+                {% endif %}
                 <a href="/admin/orders/1">我管理的订单</a>
                 <a href="/admin/orders/0">待处理的订单</a>
                 <a href="/goods/add">添加商品</a>

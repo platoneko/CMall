@@ -4,7 +4,7 @@ CREATE DATABASE CMall;
 USE CMall;
 -- 客户表
 CREATE TABLE Customer (
-	id CHAR (8) PRIMARY KEY,
+	id CHAR (16) PRIMARY KEY,
 	name CHAR (10),
 	tel CHAR (11),
 	pwd CHAR (128)
@@ -13,7 +13,7 @@ CREATE TABLE Customer (
 USE CMall;
 -- 管理员表
 CREATE TABLE Admin (
-	id CHAR (8) PRIMARY KEY,
+	id CHAR (16) PRIMARY KEY,
 	pwd CHAR (128),
 	privilege SMALLINT
 );
@@ -22,7 +22,7 @@ USE CMall;
 -- 收货地址表
 CREATE TABLE ShipAddr (
 	id INT  PRIMARY KEY AUTO_INCREMENT,
-	cust_id CHAR (8),
+	cust_id CHAR (16),
 	addr VARCHAR (100),
 	FOREIGN KEY (cust_id) REFERENCES Customer (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -87,8 +87,8 @@ CREATE TABLE CustOrder (
 	create_time DATETIME,
 	pay_time DATETIME,
 	goods_id INT ,
-	cust_id CHAR (8),
-	admin_id CHAR (8),
+	cust_id CHAR (16),
+	admin_id CHAR (16),
 	shipaddr_id INT ,
 	-- status: 0 已创建 1 已付款 2 已发货 3 已签收 4 已评价
 	status SMALLINT ,
@@ -101,10 +101,8 @@ CREATE TABLE CustOrder (
 	CHECK (status >= 0 AND status <= 4)
 );
 
-CREATE INDEX cust_id_index ON CustOrder (cust_id(8));
-CREATE INDEX admin_id_index ON CustOrder (admin_id(8));
-USE CMall;
-CREATE INDEX status ON CustOrder (status);
+CREATE INDEX cust_id_index ON CustOrder (cust_id(16));
+CREATE INDEX admin_id_index ON CustOrder (admin_id(16));
 
 USE CMall;
 -- 客户评价表
@@ -126,7 +124,7 @@ CREATE TABLE Inventory (
 	id INT  PRIMARY KEY AUTO_INCREMENT,
 	create_time DATETIME,
 	goods_id INT ,
-	admin_id CHAR (8),
+	admin_id CHAR (16),
 	stock INT ,
 	FOREIGN KEY (goods_id) REFERENCES Goods (id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (admin_id) REFERENCES Admin (id) ON DELETE CASCADE ON UPDATE CASCADE

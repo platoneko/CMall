@@ -43,8 +43,8 @@ class LoginForm(FlaskForm):
 class RegisterForm(FlaskForm):
     user = StringField('用户名', validators=[
         DataRequired('用户名不能为空'),
-        Length(3, 8, message='用户名必须是3~8位数字或字母'),
-        Regexp(PASSWORD_REG, message='用户名必须是3~8位数字或字母')])
+        Length(3, 16, message='用户名必须是3~16位数字或字母'),
+        Regexp(PASSWORD_REG, message='用户名必须是3~16位数字或字母')])
     password = PasswordField('密码', validators=[
         DataRequired('密码不能为空'),
         Length(8, 16, message='密码必须是8~16位数字或字母'),
@@ -127,3 +127,19 @@ class AppraisalForm(FlaskForm):
         default=4)
     content = TextAreaField('内容', validators=[Length(0, 100, message='评价内容不得超过100个字符')])
     submit = SubmitField('发表评价')
+
+
+class AdminRegisterForm(FlaskForm):
+    user = StringField('用户名', validators=[
+        DataRequired('用户名不能为空'),
+        Length(3, 16, message='用户名必须是3~16位数字或字母'),
+        Regexp(PASSWORD_REG, message='用户名必须是3~16位数字或字母')])
+    password = PasswordField('密码', validators=[
+        DataRequired('密码不能为空'),
+        Length(8, 16, message='密码必须是8~16位数字或字母'),
+        Regexp(PASSWORD_REG, message='密码必须是8~16位数字或字母')])
+    repassword = PasswordField('重复输入密码', validators=[EqualTo('password', '两次输入密码不一致')])
+    privilege = IntegerField('权限', default=50, validators=[
+        DataRequired('非法的输入'),
+        NumberRange(1, 100, '请输入1~100的整数')])
+    submit = SubmitField('确认注册')

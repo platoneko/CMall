@@ -6,7 +6,7 @@ import datetime
 
 class Customer(db.Model):
     __tablename__ = 'Customer'
-    id = db.Column(db.String(8), primary_key=True)
+    id = db.Column(db.String(16), primary_key=True)
     name = db.Column(db.String(10))
     tel = db.Column(db.String(11))
     pwd = db.Column(db.String(128))
@@ -41,7 +41,7 @@ class Customer(db.Model):
 
 class Admin(db.Model):
     __tablename__ = 'Admin'
-    id = db.Column(db.String(8), primary_key=True)
+    id = db.Column(db.String(16), primary_key=True)
     pwd = db.Column(db.String(128))
     privilege = db.Column(db.SmallInteger)
     orders = db.relationship('CustOrder', lazy='dynamic')
@@ -60,6 +60,9 @@ class Admin(db.Model):
 
     def get_id(self):
         return self.id
+
+    def set_pwd(self, password):
+        self.pwd = generate_password_hash(password)
 
     def check_pwd(self, password):
         return check_password_hash(self.pwd, password)

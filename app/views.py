@@ -4,7 +4,7 @@ from flask import render_template, redirect, request, flash, g, session, abort
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db
 from .forms import LoginForm, RegisterForm, AddGoodsForm, CateForm, BrandForm, \
-    ValidationForm, AddrForm, PurchaseForm, AppraisalForm
+    ValidationForm, AddrForm, PurchaseForm, AppraisalForm, AdminRegisterForm
 from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, \
     Image, ShipAddr, CustOrder, Appraisal
 from .utils import random_filename
@@ -467,6 +467,7 @@ def appraisal(id):
     db.session.commit()
     return render_template('cust/appraisal.html', form=form)
 
+
 @app.route('/admin/orders/<status>')
 @login_required
 def admin_orders(status):
@@ -536,3 +537,22 @@ def admin_ship(id):
     order.status = 2
     db.session.commit()
     return redirect('/admin/orders/2')
+
+
+@app.route('/admin/register', methods=['GET', 'POST'])
+@login_required
+def admin_register():
+    if g.user.privilege < 100:
+        abort(403)
+    form = AdminRegisterForm()
+    if form.validate_on_submit():
+        if Admin.query.get(form.user.data):
+            flash('该用户名已被注册')
+            return redirect('/admin/register')
+        user = Admin(id=form.user.data, privilege=form.privilege.data)
+        user.set_pwd(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('注册成功')
+        return redirect('/index')
+    return render_template('admin/register.html', form=form)
