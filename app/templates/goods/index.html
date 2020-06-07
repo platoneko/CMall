@@ -11,9 +11,10 @@
 {% endif %}
 {% endwith %}
 <p>
-    <img src="{{ goods.images.first().url }}" height="400" width="400"><br>
+    <img src="{{ goods.cover.url }}" height="400" width="400"><br>
     {{ goods.goods.name }}
     {% if g.user.privilege %}
+    <a href="/goods/edit/{{ goods.id }}">编辑</a>
     <a href="/goods/delete/{{ goods.id }}">删除</a>
     <a href="/goods/invent/{{ goods.id }}">盘点库存</a>
     {% endif %}<br>
@@ -32,7 +33,7 @@
 <p>
     {{ goods.description }}<br>
     {% for image in goods.images.all() %}
-        <img src="{{ image.url }}" height="500" width="500"><br>
+        <img src="{{ image.url }}" width="500"><br>
     {% endfor %}
 </p>
 <p>

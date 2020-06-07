@@ -22,8 +22,8 @@
             {% endif %}
         {% else %}
             <p>喵，欢迎来到菜猫</p>
-            <a href="/auth/login">请登录</a>
-            <a href="/auth/register">免费注册</a>
+            <a href="{{ url_for('login', next=next) }}">请登录</a>
+            <a href="{{ url_for('register', next=next) }}">免费注册</a>
         {% endif %}
         {% block content %}{% endblock %}
     </body>

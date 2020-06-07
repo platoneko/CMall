@@ -5,7 +5,11 @@
     {{ name }}<br>
     订单号 {{ order.id }}<br>
     顾客ID {{ order.cust_id }}<br>
-    数量 {{ order.quantity }} | 实际库存 {{ stock }}<br>
+    数量 {{ order.quantity }}
+    {% if order.status == 1%}
+    | 实际库存 {{ stock }}
+    {% endif %}
+    <br>
     付款金额 <span style="color: red;">￥{{ order.cost }}</span><br>
     收货地址 {{ order.shipaddr.addr }}<br>
     联系方式 {{ order.cust.tel }}<br>

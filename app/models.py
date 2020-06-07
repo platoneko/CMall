@@ -115,10 +115,18 @@ class GoodsDetail(db.Model):
     sales_num = db.Column(db.Integer)
     description = db.Column(db.String(500))
     images = db.relationship('Image', backref='goods', lazy='dynamic', cascade='delete')
+    cover = db.relationship('Cover', backref='goods', uselist=False, cascade='delete')
 
 
 class Image(db.Model):
     __tablename__ = 'Image'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    url = db.Column(db.String(100))
+    goods_id = db.Column(db.Integer, db.ForeignKey('GoodsDetail.id'), index=True)
+
+
+class Cover(db.Model):
+    __tablename__ = 'Cover'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     url = db.Column(db.String(100))
     goods_id = db.Column(db.Integer, db.ForeignKey('GoodsDetail.id'), index=True)
@@ -129,7 +137,7 @@ class CustOrder(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     create_time = db.Column(db.DateTime, default=datetime.datetime.now())
     pay_time = db.Column(db.DateTime)
-    goods_id = db.Column(db.Integer, db.ForeignKey('Goods.id'))
+    goods_id = db.Column(db.Integer, db.ForeignKey('Goods.id'), index=True)
     cust_id = db.Column(db.Integer, db.ForeignKey('Customer.id'), index=True)
     admin_id = db.Column(db.Integer, db.ForeignKey('Admin.id'), index=True)
     shipaddr_id = db.Column(db.Integer, db.ForeignKey('ShipAddr.id'))

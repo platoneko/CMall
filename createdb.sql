@@ -81,6 +81,18 @@ CREATE TABLE Image (
 
 CREATE INDEX goods_id_index ON Image (goods_id);
 
+
+USE CMall;
+-- 商品图片表
+CREATE TABLE Cover (
+	id INT  PRIMARY KEY AUTO_INCREMENT,
+	url VARCHAR (100),
+	goods_id INT ,
+	FOREIGN KEY (goods_id) REFERENCES GoodsDetail (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE INDEX goods_id_index ON Cover (goods_id);
+
 USE CMall;
 -- 订单表
 CREATE TABLE CustOrder (
@@ -104,6 +116,7 @@ CREATE TABLE CustOrder (
 
 CREATE INDEX cust_id_index ON CustOrder (cust_id(16));
 CREATE INDEX admin_id_index ON CustOrder (admin_id(16));
+CREATE INDEX goods_id_index ON CustOrder (goods_id);
 
 USE CMall;
 -- 客户评价表

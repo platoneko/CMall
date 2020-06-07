@@ -97,10 +97,44 @@ class AddGoodsForm(FlaskForm):
     description = TextAreaField('描述', validators=[
         DataRequired('描述不能为空'),
         Length(10, 500, message='描述长度不得少于10个字符、不得超过500个字符')])
-    images = FileField('上传商品图片', validators=[
-        FileRequired('必须至少上传1张图片'),
+    cover = FileField('上传商品封面图片', validators=[
+        FileRequired('商品必须有封面图片'),
+        FileAllowed(['jpg'], '仅支持.jpg后缀的图片文件')])
+    images = FileField('上传商品展示图片', validators=[
         FileAllowed(['jpg'], '仅支持.jpg后缀的图片文件')])
     submit = SubmitField('提交')
+
+
+class EditGoodsForm(FlaskForm):
+    name = StringField('商品名', validators=[
+        DataRequired('商品名不能为空'),
+        Length(1, 30, message='商品名长度不得超过30个字符')])
+    purchase_price = DecimalField('进货价', places=2, validators=[
+        DataRequired('非法的输入'),
+        NumberRange(0.01, 999999.99, message='进货价必须在0.01~999999.99之间')])
+    sale_price = DecimalField('售价', places=2, validators=[
+        DataRequired('非法的输入'),
+        NumberRange(0.01, 999999.99, message='售价必须在0.01~999999.99之间')])
+    stock = IntegerField('库存', validators=[
+        DataRequired('非法的输入'),
+        NumberRange(1, 100000, message='库存必须在1~100000之间')])
+    description = TextAreaField('描述', validators=[
+        DataRequired('描述不能为空'),
+        Length(10, 500, message='描述长度不得少于10个字符、不得超过500个字符')])
+    submit = SubmitField('提交')
+
+
+class EditCoverForm(FlaskForm):
+    cover = FileField('上传商品封面图片', validators=[
+        FileRequired('商品必须有封面图片'),
+        FileAllowed(['jpg'], '仅支持.jpg后缀的图片文件')])
+    submit = SubmitField('更换封面')
+
+
+class EditImageForm(FlaskForm):
+    images = FileField('上传商品展示图片', validators=[
+        FileAllowed(['jpg'], '仅支持.jpg后缀的图片文件')])
+    submit = SubmitField('添加/删除图片')
 
 
 class AddrForm(FlaskForm):

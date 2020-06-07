@@ -1,13 +1,14 @@
 import os
 import datetime
-from flask import render_template, redirect, request, flash, g, session, abort
+from flask import render_template, redirect, request, flash, g, session, abort, url_for
 from flask_login import login_user, logout_user, current_user, login_required
+from werkzeug.urls import url_parse
 from app import app, db
 from .forms import LoginForm, RegisterForm, AddGoodsForm, CateForm, BrandForm, \
     ValidationForm, AddrForm, PurchaseForm, AppraisalForm, AdminRegisterForm, \
-    InventoryForm
+    InventoryForm, EditGoodsForm, EditCoverForm, EditImageForm
 from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, \
-    Image, ShipAddr, CustOrder, Appraisal, Inventory
+    Image, ShipAddr, CustOrder, Appraisal, Inventory, Cover
 from .utils import random_filename
 
 
@@ -30,14 +31,14 @@ def index():
 def cate(id):
     cate = Category.query.get_or_404(id)
     goods_list = cate.goods
-    return render_template('/cate/index.html', name=cate.name, goods_list=goods_list)
+    return render_template('/cate/index.html', name=cate.name, goods_list=goods_list, next=f'/cate/index/{id}')
 
 
 @app.route('/brand/index/<id>')
 def brand(id):
     brand = Brand.query.get_or_404(id)
     goods_list = brand.goods
-    return render_template('/brand/index.html', name=brand.name, goods_list=goods_list)
+    return render_template('/brand/index.html', name=brand.name, goods_list=goods_list, next=f'/brand/index/{id}')
 
 
 @app.route('/goods/index/<id>', methods=['GET', 'POST'])
@@ -64,7 +65,8 @@ def goods(id):
         cate_name=cate_name,
         brand_name=brand_name,
         score=avg_score,
-        result_list=result_list)
+        result_list=result_list,
+        next=f'/goods/index/{id}')
 
 
 @app.route('/auth/login', methods=['GET', 'POST'])
@@ -88,7 +90,10 @@ def login():
         else:
             session['is_admin'] = False
         login_user(user, remember=False)
-        return redirect('/index')
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = '/index'
+        return redirect(next_page)
     return render_template('/auth/login.html', form=form)
 
 
@@ -106,7 +111,8 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash('注册成功')
-        return redirect('/auth/login')
+        next_page = request.args.get('next')
+        return redirect(url_for('login', next=next_page))
     return render_template('/auth/register.html', form=form)
 
 
@@ -134,9 +140,6 @@ def goods_add():
         brand_choices.append((brand.id, brand.name))
     form.brand.choices = brand_choices
     if form.validate_on_submit():
-        img = form.images.data
-        filename = random_filename(img.filename)
-        url = os.path.join('/images/goods', filename)
         goods = Goods(name=form.name.data)
         db.session.add(goods)
         goods_detail = GoodsDetail(
@@ -150,13 +153,150 @@ def goods_add():
             sales_num=0,
             description=form.description.data)
         db.session.add(goods_detail)
-        image = Image(url=url, goods=goods_detail)
-        db.session.add(image)
-        img.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+        f = form.cover.data
+        filename = random_filename(f.filename)
+        f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+        url = os.path.join('/images/goods', filename)
+        cover = Cover(url=url, goods=goods_detail)
+        db.session.add(cover)
+        files = request.files.getlist('images')
+        for f in files:
+            if f.filename == '':
+                break
+            filename = random_filename(f.filename)
+            f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+            url = os.path.join('/images/goods', filename)
+            image = Image(url=url, goods=goods_detail)
+            db.session.add(image)
         db.session.commit()
         flash('商品添加成功')
         return redirect('/goods/add')
     return render_template('/goods/add.html', form=form)
+
+
+@app.route('/goods/edit/<id>')
+@login_required
+def goods_edit(id):
+    if g.user.privilege < 100:
+        abort(403)
+    goods = GoodsDetail.query.get_or_404(id)
+    goods_form = EditGoodsForm()
+    cover_form = EditCoverForm()
+    image_form = EditImageForm()
+    return render_template(
+        'goods/edit.html',
+        goods_form=goods_form,
+        cover_form=cover_form,
+        image_form=image_form,
+        goods=goods,
+        cover=goods.cover,
+        images=goods.images)
+
+
+@app.route('/goods/edit/info/<id>', methods=['POST'])
+@login_required
+def goods_edit_info(id):
+    if g.user.privilege < 100:
+        abort(403)
+    goods = GoodsDetail.query.get_or_404(id)
+    goods_form = EditGoodsForm()
+    cover_form = EditCoverForm()
+    image_form = EditImageForm()
+    if goods_form.validate_on_submit():
+        goods = db.session.query(GoodsDetail).with_for_update().get(id)
+        goods.goods.name = goods_form.name.data
+        goods.purchase_price = goods_form.purchase_price.data
+        goods.sale_price = goods_form.sale_price.data
+        goods.real_stock = goods_form.stock.data
+        sql = f"""
+            SELECT SUM(quantity) FROM CustOrder
+            WHERE (
+              goods_id = {goods.id} AND
+              status = 1
+            )
+        """
+        sold_qty = db.session.execute(sql).fetchall()[0][0]
+        if sold_qty is None:
+            sold_qty = 0
+        goods.stock = goods_form.stock.data - sold_qty
+        goods.description = goods_form.description.data
+        db.session.commit()
+        return redirect(f'/goods/edit/{id}')
+    return render_template(
+        'goods/edit.html',
+        goods_form=goods_form,
+        cover_form=cover_form,
+        image_form=image_form,
+        goods=goods,
+        cover=goods.cover,
+        images=goods.images.all())
+
+
+@app.route('/goods/edit/cover/<id>', methods=['POST'])
+@login_required
+def goods_edit_cover(id):
+    if g.user.privilege < 100:
+        abort(403)
+    goods = GoodsDetail.query.get_or_404(id)
+    goods_form = EditGoodsForm()
+    cover_form = EditCoverForm()
+    image_form = EditImageForm()
+    goods_cover = goods.cover
+    if cover_form.validate_on_submit():
+        os.remove(os.path.join(app.config['UPLOAD_PATH'], os.path.split(goods_cover.url)[-1]))
+        db.session.delete(goods_cover)
+        f = cover_form.cover.data
+        filename = random_filename(f.filename)
+        f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+        url = os.path.join('/images/goods', filename)
+        cover = Cover(url=url, goods=goods)
+        db.session.add(cover)
+        db.session.commit()
+        return redirect(f'/goods/edit/{id}')
+    return render_template(
+        'goods/edit.html',
+        goods_form=goods_form,
+        cover_form=cover_form,
+        image_form=image_form,
+        goods=goods,
+        cover=goods_cover,
+        images=goods.images.all())
+
+
+@app.route('/goods/edit/images/<id>', methods=['POST'])
+@login_required
+def goods_edit_images(id):
+    if g.user.privilege < 100:
+        abort(403)
+    goods = GoodsDetail.query.get_or_404(id)
+    goods_form = EditGoodsForm()
+    cover_form = EditCoverForm()
+    image_form = EditImageForm()
+    images = goods.images.all()
+    if image_form.validate_on_submit():
+        for img in images:
+            if request.form.get(f'img_{img.id}'):
+                os.remove(os.path.join(app.config['UPLOAD_PATH'], os.path.split(img.url)[-1]))
+                db.session.delete(img)
+        files = request.files.getlist('images')
+        for f in files:
+            if f.filename == '':
+                break
+            filename = random_filename(f.filename)
+            f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+            url = os.path.join('/images/goods', filename)
+            image = Image(url=url, goods=goods)
+            db.session.add(image)
+        db.session.commit()
+        return redirect(f'/goods/edit/{id}')
+    return render_template(
+        'goods/edit.html',
+        goods_form=goods_form,
+        cover_form=cover_form,
+        image_form=image_form,
+        goods=goods,
+        cover=goods.cover,
+        images=images)
 
 
 @app.route('/cate/edit', methods=['GET', 'POST'])
@@ -253,6 +393,7 @@ def goods_delete(id):
         if g.user.check_pwd(form.password.data):
             for image in goods.images.all():
                 os.remove(os.path.join(app.config['UPLOAD_PATH'], os.path.split(image.url)[-1]))
+            os.remove(os.path.join(app.config['UPLOAD_PATH'], os.path.split(goods.cover.url)[-1]))
             db.session.delete(goods)
             db.session.commit()
             flash(f'商品\"{name}\"已被删除')
@@ -508,7 +649,10 @@ def admin_order(id):
         status = order.status
     appraisal = order.appraisal
     goods = order.goods
-    stock = goods.detail.real_stock
+    if order.status == 1:
+        stock = goods.detail.real_stock
+    else:
+        stock = None
     return render_template('admin/order.html', order=order, status=status, appraisal=appraisal, name=goods.name, stock=stock)
 
 

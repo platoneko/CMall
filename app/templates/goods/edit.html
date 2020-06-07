@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a href="/goods/index/{{ goods.id }}">返回商品页面</a>
+<form action="/goods/edit/info/{{ goods.id }}" method="post">
+    {{ goods_form.csrf_token }}
+    <p>
+        {{ goods_form.name.label }}<br>
+        {{ goods_form.name(size=32, required=false, value=goods.goods.name) }}<br>
+        <span style="color: red;">{{ goods_form.name.errors[0] }}</span>
+    </p>
+    <p>
+        {{ goods_form.purchase_price.label }}<br>
+        {{ goods_form.purchase_price(size=32, required=false, value=goods.purchase_price) }}<br>
+        <span style="color: red;">{{ goods_form.purchase_price.errors[0] }}</span>
+    </p>
+    <p>
+        {{ goods_form.sale_price.label }}<br>
+        {{ goods_form.sale_price(size=32, required=false, value=goods.sale_price) }}<br>
+        <span style="color: red;">{{ goods_form.sale_price.errors[0] }}</span>
+    </p>
+    <p>
+        {{ goods_form.stock.label }}<br>
+        {{ goods_form.stock(size=32, required=false, value=goods.real_stock) }}<br>
+        <span style="color: red;">{{ goods_form.stock.errors[0] }}</span>
+    </p>
+    <p>
+        {% set f = goods_form.description.process_data(goods.description) %}
+        {{ goods_form.description.label }}<br>
+        {{ goods_form.description(cols=64, rows=8, required=false) }}<br>
+        <span style="color: red;">{{ goods_form.description.errors[0] }}</span>
+    </p>
+    <p>{{ goods_form.submit() }}</p>
+</form>
+
+<form action="/goods/edit/cover/{{ goods.id }}" method="post" enctype="multipart/form-data">
+    {{ cover_form.csrf_token }}
+    <p>
+        当前封面图片<br>
+        <img src="{{ cover.url }}" height="400" width="400"><br>
+    </p>
+    <p>
+        {{ cover_form.cover.label }}<br>
+        {{ cover_form.cover(required=false) }}<br>
+        <span style="color: red;">{{ cover_form.cover.errors[0] }}</span>
+    </p>
+    <p>{{ cover_form.submit() }}</p>
+</form>
+
+<form action="/goods/edit/images/{{ goods.id }}" method="post" enctype="multipart/form-data">
+    {{ image_form.csrf_token }}
+    <p>
+        当前展示图片<br>
+        {% for image in images %}
+        <img src="{{ image.url }}" width="400">
+        <label for="img_{{ image.id }}">删除</label><input id="img_{{ image.id }}" name="img_{{ image.id }}" type="checkbox" value="y"><br>
+        {% endfor %}
+    </p>
+    <p>
+        {{ image_form.images.label }}<br>
+        {{ image_form.images(multiple="multiple", required=false) }}<br>
+        <span style="color: red;">{{ image_form.images.errors[0] }}</span>
+    </p>
+    <p>{{ image_form.submit() }}</p>
+</form>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+        {{ message }}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endblock %}
