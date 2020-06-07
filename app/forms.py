@@ -60,6 +60,27 @@ class RegisterForm(FlaskForm):
     submit = SubmitField('确认注册')
 
 
+class EditCustForm(FlaskForm):
+    name = StringField('昵称', validators=[
+        DataRequired('昵称不能为空'),
+        Length(1, 10, message='昵称必须是1~10位中文字符、数字或字母'),
+        Regexp(PASSWORD_REG, message='昵称必须是1~10位中文字符、数字或字母')])
+    tel = StringField('手机号码', validators=[
+        DataRequired('手机号码不能为空'),
+        Regexp(TEL_REG, message='请输入正确的手机号码')])
+    submit = SubmitField('提交信息')
+
+
+class EditPasswordForm(FlaskForm):
+    old = PasswordField('旧密码', validators=[DataRequired('密码不能为空')])
+    new = PasswordField('新密码', validators=[
+        DataRequired('密码不能为空'),
+        Length(8, 16, message='密码必须是8~16位数字或字母'),
+        Regexp(PASSWORD_REG, message='密码必须是8~16位数字或字母')])
+    repassword = PasswordField('重复输入密码', validators=[EqualTo('new', '两次输入密码不一致')])
+    submit = SubmitField('修改密码')
+
+
 class ValidationForm(FlaskForm):
     password = PasswordField('密码', validators=[DataRequired('密码不能为空')])
     submit = SubmitField('提交')

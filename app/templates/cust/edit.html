@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+        {{ message }}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+<p>
+    用户信息
+</p>
+<form action="" method="post">
+    {{ form.csrf_token }}
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(size=32, required=false, value=g.user.name) }}<br>
+        <span style="color: red;">{{ form.name.errors[0] }}</span>
+    </p>
+    <p>
+        {{ form.tel.label }}<br>
+        {{ form.tel(size=32, required=false, value=g.user.tel) }}<br>
+        <span style="color: red;">{{ form.tel.errors[0] }}</span>
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}

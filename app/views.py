@@ -6,7 +6,8 @@ from werkzeug.urls import url_parse
 from app import app, db
 from .forms import LoginForm, RegisterForm, AddGoodsForm, CateForm, BrandForm, \
     ValidationForm, AddrForm, PurchaseForm, AppraisalForm, AdminRegisterForm, \
-    InventoryForm, EditGoodsForm, EditCoverForm, EditImageForm
+    InventoryForm, EditGoodsForm, EditCoverForm, EditImageForm, EditCustForm, \
+    EditPasswordForm
 from .models import Customer, Admin, Category, Brand, Goods, GoodsDetail, \
     Image, ShipAddr, CustOrder, Appraisal, Inventory, Cover
 from .utils import random_filename
@@ -736,3 +737,33 @@ def inventory():
         abort(403)
     inventories = Inventory.query.order_by(Inventory.id.desc()).all()
     return render_template('admin/inventory.html', inventories=inventories)
+
+
+@app.route('/cust/edit', methods=['GET', 'POST'])
+@login_required
+def cust_edit():
+    if g.user.privilege:
+        return redirect('/index')
+    form = EditCustForm()
+    if form.validate_on_submit():
+        g.user.name = form.name.data
+        g.user.tel = form.tel.data
+        db.session.commit()
+        flash('信息更新成功')
+        return redirect('/cust/edit')
+    return render_template('cust/edit.html', form=form)
+
+
+@app.route('/password/edit', methods=['GET', 'POST'])
+@login_required
+def edit_password():
+    form = EditPasswordForm()
+    if form.validate_on_submit():
+        if not g.user.check_pwd(form.old.data):
+            flash('密码验证错误')
+            return redirect('/password/edit')
+        g.user.set_pwd(form.new.data)
+        db.session.commit()
+        flash('密码修改成功')
+        return redirect('/index')
+    return render_template('password_edit.html', form=form)

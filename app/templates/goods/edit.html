@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<a href="/goods/index/{{ goods.id }}">返回商品页面</a>
+<p>
+    <a href="/goods/index/{{ goods.id }}">返回商品页面</a>
+</p>
+
 <form action="/goods/edit/info/{{ goods.id }}" method="post">
     {{ goods_form.csrf_token }}
     <p>
