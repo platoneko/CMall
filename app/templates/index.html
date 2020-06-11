@@ -10,6 +10,12 @@
 </ul>
 {% endif %}
 {% endwith %}
+<form action="/query" method="get">
+    <p>
+        <input id="inputs" name="inputs" size="32" type="text" value="小米 10">
+        <input id="submit" name="submit" type="submit" value="查询商品">
+    </p>
+</form>
 <p>商品分类</p>
 <ul>
 {% for category in categories %}

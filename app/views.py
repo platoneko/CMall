@@ -767,3 +767,16 @@ def edit_password():
         flash('密码修改成功')
         return redirect('/index')
     return render_template('password_edit.html', form=form)
+
+
+@app.route('/query')
+def query():
+    inputs = request.args.get('inputs')
+    if inputs is None:
+        return redirect('/index')
+    inputs = inputs.strip()
+    if not inputs:
+        return redirect('/index')
+    key_words = '%'.join(inputs.split())
+    goods_list = Goods.query.filter(Goods.name.like(f'%{key_words}%')).all()
+    return render_template('/query.html', inputs=inputs, goods_list=goods_list)
