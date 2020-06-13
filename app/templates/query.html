@@ -9,13 +9,16 @@
     </p>
 </form>
 {% for goods in goods_list %}
+    {% set detail = goods.detail %}
+    {% if detail %}
     <p>
         <a href="/goods/index/{{ goods.id }}">
-            <img src="{{ goods.detail.cover.url }}", height="200", width="200"><br>
+            <img src="{{ detail.cover.url }}", height="200", width="200"><br>
             {{ goods.name }}
         </a>
-        <span style="color: red;">￥{{ goods.detail.sale_price }}</span>
+        <span style="color: red;">￥{{ detail.sale_price }}</span>
     </p>
+    {% endif %}
 {% endfor %}
 
 {% endblock %}
